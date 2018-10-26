@@ -2,16 +2,11 @@
 
 /* STATIC VARIABLES ==========================================================*/
 
-
 /* CONSTRUCTORS ==============================================================*/
-template <class T> Operand<T>::Operand( void ) {
-	return ;
-}
 
 template <class T> Operand<T>::Operand( T value, eOperandType type ):
 _value( value ),
 _type( type ) {
-	return ;
 }
 
 template <class T> Operand<T>::Operand( Operand const & src ) {
@@ -24,18 +19,23 @@ template <class T> IOperand &Operand<T>::operator=( IOperand const & rhs ) const
 }
 
 template <class T> IOperand const *Operand<T>::operator+( IOperand const & rhs ) const {
+	return NULL;
 }
 
 template <class T> IOperand const *Operand<T>::operator-( IOperand const & rhs ) const {
+	return NULL;
 }
 
 template <class T> IOperand const *Operand<T>::operator*( IOperand const & rhs ) const {
+	return NULL;
 }
 
 template <class T> IOperand const *Operand<T>::operator/( IOperand const & rhs ) const {
+	return NULL;
 }
 
 template <class T> IOperand const *Operand<T>::operator%( IOperand const & rhs ) const {
+	return NULL;
 }
 
 
@@ -77,3 +77,11 @@ template <class T> std::string const	&Operand<T>::toString( void ) const {
 
 
 /* OPERATOR ==================================================================*/
+
+/* TEMPLATES =================================================================*/
+
+template class Operand<int8_t>;
+template class Operand<int16_t>;
+template class Operand<int32_t>;
+template class Operand<float>;
+template class Operand<double>;
