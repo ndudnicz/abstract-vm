@@ -18,8 +18,8 @@ PATH_INCLUDES = includes
 
 # SOURCES LIST ================================================================#
 
-SRC =	main.cpp \
-IOperand.cpp \
+SRC = main.cpp \
+Operand.cpp \
 
 # OBJECTS LIST ================================================================#
 
@@ -41,4 +41,4 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) -o $@ $(OBJ)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(LFLAGS) -o $@ -c $< -I $(PATH_INCLUDES) -I include
+	$(CC) $(LFLAGS) -o $@ -c $< -I $(PATH_INCLUDES)
