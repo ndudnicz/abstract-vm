@@ -41,4 +41,6 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) -o $@ $(OBJ)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(LFLAGS) -o $@ -c $< -I $(PATH_INCLUDES)
+	$(CC) $(LFLAGS) -MMD -o $@ -c $< -I $(PATH_INCLUDES)
+
+-include $(OBJ:.o=.d)
