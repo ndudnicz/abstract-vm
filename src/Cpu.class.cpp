@@ -35,18 +35,16 @@ int		Cpu::getStdin( void ) {
 		if ( std::cin.eof() ) {
 			throw Cpu::DidntGetEndOfInputException();
 		} else if ( input.compare( END_OF_INPUT ) == 0 ) {
-			goto end;
+			this->printInput(); // DEBUG
+			return 0;
 		} else {
 			this->input.push_back( input );
 		}
 	}
-	end:
-		this->printInput();
-		return 0;
 }
 
 // DEBUG
-void Cpu::printInput( void ) {
+void Cpu::printInput( void ) { // DEBUG
 	std::vector<std::string>::iterator		it = this->input.begin();
 	for (; it < this->input.end(); it++) {
 		std::cout << *it << std::endl;
