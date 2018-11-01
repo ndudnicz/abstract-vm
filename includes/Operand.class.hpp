@@ -1,5 +1,5 @@
-#ifndef OPERAND_HPP
-# define OPERAND_HPP
+#ifndef OPERAND_CLASS_HPP
+# define OPERAND_CLASS_HPP
 
 # include "IOperand.hpp"
 

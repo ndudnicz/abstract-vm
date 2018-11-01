@@ -19,7 +19,9 @@ PATH_INCLUDES = includes
 # SOURCES LIST ================================================================#
 
 SRC = main.cpp \
-Operand.cpp \
+Operand.class.cpp \
+Stack.class.cpp \
+Cpu.class.cpp \
 
 # OBJECTS LIST ================================================================#
 

@@ -1,4 +1,4 @@
-#include "Operand.hpp"
+#include "Operand.class.hpp"
 #include <sstream>
 #include <iostream>
 
