@@ -3,6 +3,14 @@
 
 # include "IOperand.hpp"
 
+// typedef struct	s_registers {
+// 	int8_t	_int8;
+// 	int16_t	_int16;
+// 	int32_t	_int32;
+// 	float		_float;
+// 	double	_double;
+// }								t_registers;
+
 template <typename T>
 class Operand: public IOperand {
 
@@ -13,6 +21,14 @@ private:
 	T							_value;
 	eOperandType	_type;
 	std::string		_str;
+	// static t_registers	_registers;
+	// static int const		_registersIndex[5]; = {
+	// 	sizeof( int8_t ),
+	// 	sizeof( int16_t ),
+	// 	sizeof( int32_t ),
+	// 	sizeof( float ),
+	// 	sizeof( double )
+	// }
 
 protected:
 

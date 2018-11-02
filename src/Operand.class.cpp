@@ -3,6 +3,15 @@
 #include <iostream>
 
 /* STATIC VARIABLES ==========================================================*/
+// int const		_registersIndex[5] = {
+// 	0,
+// 	sizeof( int8_t ),
+// 	sizeof( int8_t ) + sizeof( int16_t ),
+// 	sizeof( int8_t ) + sizeof( int16_t ) + sizeof( int32_t ),
+// 	sizeof( int8_t ) + sizeof( int16_t ) + sizeof( int32_t ) + sizeof( float )
+// };
+//
+// t_registers	_registers = 0;
 
 /* CONSTRUCTORS ==============================================================*/
 
@@ -39,6 +48,10 @@ Operand<T>				&Operand<T>::operator=( Operand const & rhs ) {
 
 template <class T>
 IOperand const	*Operand<T>::operator+( IOperand const & rhs ) const {
+	// eOperandType	type = this->getType() > rhs.getType() ? this->getType() : rhs.getType();
+	// Operand<T>::_registers + Operand<T>::_registersIndex[ type ] = 1;
+	// double			result = this->getValue() + rhs.getValue();
+	// Operand<T>	*op = new Operand(   )
 	return NULL;
 }
 
