@@ -16,7 +16,7 @@ _type( type ) {
 	} else {
 		ss << static_cast<double>(this->_value);
 	}
-	this->str = ss.str();
+	this->_str = ss.str();
 	// std::cout << ss.str() << std::endl;
 	// std::cout << this->str << std::endl;
 }
@@ -25,7 +25,7 @@ template <class T>
 Operand<T>::Operand( Operand const & src ):
 _value( src.getValue() ),
 _type( src.getType() ),
-str( src.toString() ) {
+_str( src.toString() ) {
 }
 
 /* MEMBER OPERATORS OVERLOAD =================================================*/
@@ -103,7 +103,7 @@ T								Operand<T>::getValue( void ) const {
 #include <iostream>
 template <class T>
 std::string const	&Operand<T>::toString( void ) const {
-	return this->str;
+	return this->_str;
 }
 
 /* NON MEMBER FUNCTIONS ======================================================*/

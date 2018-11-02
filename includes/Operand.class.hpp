@@ -12,12 +12,12 @@ private:
 
 	T							_value;
 	eOperandType	_type;
+	std::string		_str;
 
 protected:
 
 public:
 
-	std::string	str;
 
 	Operand( T value, eOperandType type );
 	Operand( Operand const & src );
