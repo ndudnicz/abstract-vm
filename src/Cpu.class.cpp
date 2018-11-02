@@ -53,7 +53,11 @@ int		Cpu::_getFile( char const *const filename ) {
 	std::ifstream	file( filename );
 
 	if ( file.good() ) {
-		std::cout << "read file" << '\n';
+		while ( std::getline( file, line ) ) {
+			this->_input.push_back( line );
+		}
+		file.close();
+		this->_printInput(); // DEBUG
 	} else {
 		std::string	str1( "Exception : Can't open file : " );
 		std::string	str2( filename );
@@ -66,7 +70,7 @@ int		Cpu::_getFile( char const *const filename ) {
 void Cpu::_printInput( void ) { // DEBUG
 	std::vector<std::string>::iterator		it = this->_input.begin();
 	for (; it < this->_input.end(); it++) {
-		std::cout << *it << std::endl;
+		std::cout << "DEBUG : " << *it << std::endl;
 	}
 }
 // DEBUG
