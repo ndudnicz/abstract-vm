@@ -6,6 +6,7 @@
 # include <vector>
 # include <iostream>
 # include <stdexcept>
+# include <fstream>
 
 # define END_OF_INPUT	";;"
 
@@ -19,13 +20,13 @@ private:
 	Cpu( Cpu const & src );
 	Cpu &	operator=( Cpu const & rhs );
 
-	std::vector<std::string>	input;
-	std::vector<Stack*>				stack;
+	std::vector<std::string>	_input;
+	std::vector<Stack*>				_stack;
 
-	int	getStdin( void );
+	int	_getStdin( void );
+	int	_getFile( char const *const filename );
 
-	// DEBUG
-	void	printInput( void );
+	void	_printInput( void );// DEBUG
 
 protected:
 
@@ -33,15 +34,23 @@ public:
 	Cpu( void );
 	~Cpu( void );
 
-	int		run( int ac, char **av );
+	int		run( int ac, char const **av );
 
 	/* DIDN'T GET END_OF_INPUT STRING EXCEPTION ================================*/
-	class DidntGetEndOfInputException : std::exception {
+	class DidntGetEndOfInputException : public std::exception {
 
 	public:
 		DidntGetEndOfInputException( void ) throw();
 		~DidntGetEndOfInputException( void ) throw();
 		virtual const char *what( void ) const throw();
+
+	};
+
+	/* CANT OPEN FILE EXCEPTION ================================================*/
+	class CantOpenFileException : public std::runtime_error {
+
+	public:
+		CantOpenFileException(const std::string& error_message);
 
 	};
 

@@ -3,7 +3,7 @@
 #include <vector>
 #include "Cpu.class.hpp"
 
-int		main(int ac, char **av) {
+int		main(int ac, char const **av) {
 	// Operand<int32_t> *op = new Operand<int32_t>(1, INT32);
 	// Operand<int8_t> *op2 = new Operand<int8_t>(1, INT8);
 	// Operand<double> *opdouble = new Operand<double>(1.0001, DOUBLE);
