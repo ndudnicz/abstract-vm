@@ -4,7 +4,7 @@
 #include "Cpu.class.hpp"
 
 int		main(int ac, char const **av) {
-	Operand<int32_t> op("2", INT32);
+	Operand<int32_t> op("3", INT32);
 	Operand<float> op2("200.222", FLOAT);
 	Operand<float> opZero("0.0", FLOAT);
 	// Operand<double> *opdouble = new Operand<double>(1.0001, DOUBLE);
@@ -28,7 +28,14 @@ int		main(int ac, char const **av) {
 	std::cout << (op2 / op)->toString() << '\n';
 	try {
 		std::cout << (op2 / opZero)->toString() << '\n';
-	} catch (Operand<float>::DivisionbyZero &e) {
+	} catch (Operand<float>::FloatingPoint &e) {
+		std::cout << e.what() << '\n';
+	}
+
+	std::cout << (op2 % op)->toString() << '\n';
+	try {
+		std::cout << (op2 % opZero)->toString() << '\n';
+	} catch (Operand<float>::FloatingPoint &e) {
 		std::cout << e.what() << '\n';
 	}
 	return 0;

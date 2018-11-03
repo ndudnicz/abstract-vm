@@ -38,11 +38,11 @@ public:
 	std::string const	&toString( void ) const;
 
 	/* DIVISION BY 0 EXCEPTION ===================================================*/
-	class DivisionbyZero : public std::exception {
+	class FloatingPoint : public std::exception {
 
 	public:
-		DivisionbyZero( void ) throw();
-		~DivisionbyZero( void ) throw();
+		FloatingPoint( void ) throw();
+		~FloatingPoint( void ) throw();
 		virtual const char *what( void ) const throw();
 
 	};
