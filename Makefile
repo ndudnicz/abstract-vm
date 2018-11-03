@@ -26,13 +26,14 @@ Cpu.class.cpp \
 # OBJECTS LIST ================================================================#
 
 OBJ = $(SRC:%.cpp=obj/%.o)
+DEP = $(SRC:%.cpp=obj/%.d)
 
 # GENERIC RULES ===============================================================#
 
 all: $(NAME)
 
 clean:
-		$(RM) $(OBJ)
+		$(RM) $(OBJ) $(DEP)
 
 fclean: clean
 		$(RM) $(NAME)

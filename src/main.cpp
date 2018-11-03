@@ -4,8 +4,9 @@
 #include "Cpu.class.hpp"
 
 int		main(int ac, char const **av) {
-	// Operand<int32_t> *op = new Operand<int32_t>(1, INT32);
-	// Operand<int8_t> *op2 = new Operand<int8_t>(1, INT8);
+	Operand<int32_t> op("2", INT32);
+	Operand<float> op2("200.222", FLOAT);
+	Operand<float> opZero("0.0", FLOAT);
 	// Operand<double> *opdouble = new Operand<double>(1.0001, DOUBLE);
 	//
 	// IOperand *p = op;
@@ -17,7 +18,18 @@ int		main(int ac, char const **av) {
 	// std::cout << op->toString() << std::endl;
 	// std::cout << op2->toString() << std::endl;
 	// std::cout << opdouble->toString() << std::endl;
-	Cpu cpu;
-	(void)cpu.run(ac, av);
+
+	// Cpu cpu;
+	// (void)cpu.run(ac, av);
+	// IOperand const *result = op + op2;
+	std::cout << (op + op2)->toString() << '\n';
+	std::cout << (op - op2)->toString() << '\n';
+	std::cout << (*(op + op2) * op)->toString() << '\n';
+	std::cout << (op2 / op)->toString() << '\n';
+	try {
+		std::cout << (op2 / opZero)->toString() << '\n';
+	} catch (Operand<float>::DivisionbyZero &e) {
+		std::cout << e.what() << '\n';
+	}
 	return 0;
 }

@@ -2,14 +2,9 @@
 # define OPERAND_CLASS_HPP
 
 # include "IOperand.hpp"
+# include <stdexcept>
 
-// typedef struct	s_registers {
-// 	int8_t	_int8;
-// 	int16_t	_int16;
-// 	int32_t	_int32;
-// 	float		_float;
-// 	double	_double;
-// }								t_registers;
+# define MAX(A, B) (A > B ? A : B)
 
 template <typename T>
 class Operand: public IOperand {
@@ -18,24 +13,16 @@ private:
 
 	Operand( void );
 
-	T							_value;
 	eOperandType	_type;
 	std::string		_str;
-	// static t_registers	_registers;
-	// static int const		_registersIndex[5]; = {
-	// 	sizeof( int8_t ),
-	// 	sizeof( int16_t ),
-	// 	sizeof( int32_t ),
-	// 	sizeof( float ),
-	// 	sizeof( double )
-	// }
 
 protected:
 
 public:
 
+	static int const	precisions[5];
 
-	Operand( T value, eOperandType type );
+	Operand( std::string str, eOperandType type );
 	Operand( Operand const & src );
 	~Operand( void );
 
@@ -48,8 +35,18 @@ public:
 
 	int								getPrecision( void ) const;
 	eOperandType			getType( void ) const;
-	T									getValue( void ) const;
 	std::string const	&toString( void ) const;
+
+	/* DIVISION BY 0 EXCEPTION ===================================================*/
+	class DivisionbyZero : public std::exception {
+
+	public:
+		DivisionbyZero( void ) throw();
+		~DivisionbyZero( void ) throw();
+		virtual const char *what( void ) const throw();
+
+	};
+
 };
 
 #endif
