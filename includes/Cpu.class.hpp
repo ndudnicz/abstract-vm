@@ -31,7 +31,11 @@ private:
 	int		_getFile( char const *const filename );
 	int		_generateStack( void );
 	int		_validInput( void );
-	int		_regValidInstruction( int const line, char const *const str, std::cmatch *cm ) const;
+	int		_regValidInstruction(
+		int const line,
+		char const *const str,
+		std::cmatch *cm
+	) const;
 	int		_regValidCm( std::cmatch &cm ) const;
 
 	void	_printInput( void );// DEBUG

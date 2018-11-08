@@ -113,6 +113,7 @@ int		Cpu::_regValidInstruction(
 	std::regex	regMod(REG_MOD);
 	std::regex	regPrint(REG_PRINT);
 	std::regex	regExit(REG_EXIT);
+	std::regex	regComment(REG_COMMENT);
 
 	if ( (std::regex_match( str, *cm, regPush) == true  ||
 	std::regex_match( str, *cm, regAssert ) == true) && cm->size() == 2 ) {
@@ -125,7 +126,8 @@ int		Cpu::_regValidInstruction(
 	std::regex_match( str, *cm, regDiv ) == true ||
 	std::regex_match( str, *cm, regMod ) == true ||
 	std::regex_match( str, *cm, regPrint ) == true ||
-	std::regex_match( str, *cm, regExit ) == true) && cm->size() == 1 ) {
+	std::regex_match( str, *cm, regExit ) == true ||
+	std::regex_match( str, *cm, regComment ) == true) && cm->size() == 1 ) {
 		std::cout << "reg found : other" << '\n';
 	} else {
 		std::ostringstream	strs;
