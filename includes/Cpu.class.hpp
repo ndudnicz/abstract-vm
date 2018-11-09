@@ -2,7 +2,7 @@
 # define CPU_CLASS_HPP
 
 # include "IOperand.hpp"
-# include "Stack.class.hpp"
+// # include "Stack.class.hpp"
 # include <vector>
 # include <iostream>
 # include <stdexcept>
@@ -26,7 +26,7 @@ private:
 	Cpu &	operator=( Cpu const & rhs );
 
 	std::vector<std::string>	_input;
-	std::vector<Stack*>				_stack;
+	std::vector<IOperand*>		_stack;
 
 	int		_getStdin( void );
 	int		_getFile( char const *const filename );

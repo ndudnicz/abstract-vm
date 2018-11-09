@@ -20,7 +20,6 @@ PATH_INCLUDES = includes
 
 SRC = main.cpp \
 Operand.class.cpp \
-Stack.class.cpp \
 Cpu.class.cpp \
 
 # OBJECTS LIST ================================================================#
