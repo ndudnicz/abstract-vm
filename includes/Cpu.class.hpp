@@ -13,6 +13,7 @@
 
 # define EXCEP_CANT_OPEN_FILE				"Exception : Can't open file : "
 # define EXCEP_UNKNOWN_INSTRUCTION	"Exception : Unknown instruction line : "
+# define EXCEP_UNKNOWN_TYPE_OR_VALUE	"Exception : Unknown type or invalid value line : "
 
 # define _CONCAT(A, B) A # B
 # define EVALUATOR(A, B) _CONCAT(A, B)
@@ -33,10 +34,13 @@ private:
 	int		_validInput( void );
 	int		_regValidInstruction(
 		int const line,
-		char const *const str,
-		std::cmatch *cm
+		std::string const str,
+		std::smatch *sm
 	) const;
-	int		_regValidCm( std::cmatch &cm ) const;
+	int		_regValidSm(
+		int const line,
+		std::smatch &sm
+	) const;
 
 	void	_printInput( void );// DEBUG
 
@@ -62,10 +66,16 @@ public:
 		CantOpenFileException(const std::string& error_message);
 	};
 
-	/* DIDN'T GET END_OF_INPUT STRING EXCEPTION ================================*/
+	/* UNKNOWN INSTRUCTION EXCEPTION ===========================================*/
 	class UnknownInstructionException : public std::runtime_error {
 	public:
 		UnknownInstructionException(const std::string& error_message);
+	};
+
+	/* UNKNOWN TYPE OR VALUE EXCEPTION =========================================*/
+	class UnknownTypeOrValueException : public std::runtime_error {
+	public:
+		UnknownTypeOrValueException(const std::string& error_message);
 	};
 
 };
