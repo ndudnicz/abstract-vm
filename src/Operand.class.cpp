@@ -14,6 +14,18 @@ template <class T>
 Operand<T>::Operand( std::string str, eOperandType type ):
 _type( type ),
 _str( str ) {
+	// switch (type) {
+	// 	case INT8:
+	// 	break;
+	// 	case INT16:
+	// 	break;
+	// 	case INT32:
+	// 	break;
+	// 	case FLOAT:
+	// 	break;
+	// 	case DOUBLE:
+	// 	break;
+	// }
 }
 
 template <class T>
@@ -24,15 +36,15 @@ _str( src.toString() ) {
 
 /* MEMBER OPERATORS OVERLOAD =================================================*/
 
-template <class T>
-Operand<T>				&Operand<T>::operator=( Operand const & rhs ) {
+template <class T>Operand<T> &
+Operand<T>::operator=( Operand const & rhs ) {
 	this->_type = rhs.getType();
 	this->_str = rhs.toString();
 	return *this;
 }
 
-template <class T>
-IOperand const	*Operand<T>::operator+( IOperand const & rhs ) const {
+template <class T> IOperand const*
+Operand<T>::operator+( IOperand const & rhs ) const {
 	double							result = std::stod( this->toString() ) + std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
@@ -42,8 +54,8 @@ IOperand const	*Operand<T>::operator+( IOperand const & rhs ) const {
 	return new Operand( strs.str(), type );
 }
 
-template <class T>
-IOperand const	*Operand<T>::operator-( IOperand const & rhs ) const {
+template <class T> IOperand const*
+Operand<T>::operator-( IOperand const & rhs ) const {
 	double							result = std::stod( this->toString() ) - std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
@@ -53,8 +65,8 @@ IOperand const	*Operand<T>::operator-( IOperand const & rhs ) const {
 	return new Operand( strs.str(), type );
 }
 
-template <class T>
-IOperand const	*Operand<T>::operator*( IOperand const & rhs ) const {
+template <class T> IOperand const*
+Operand<T>::operator*( IOperand const & rhs ) const {
 	double							result = std::stod( this->toString() ) * std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
@@ -64,8 +76,8 @@ IOperand const	*Operand<T>::operator*( IOperand const & rhs ) const {
 	return new Operand( strs.str(), type );
 }
 
-template <class T>
-IOperand const	*Operand<T>::operator/( IOperand const & rhs ) const {
+template <class T> IOperand const*
+Operand<T>::operator/( IOperand const & rhs ) const {
 	if ( std::stod( rhs.toString() ) == 0 ) {
 		throw Operand<T>::FloatingPoint();
 	} else {
@@ -79,8 +91,8 @@ IOperand const	*Operand<T>::operator/( IOperand const & rhs ) const {
 	}
 }
 
-template <class T>
-IOperand const	*Operand<T>::operator%( IOperand const & rhs ) const {
+template <class T> IOperand const*
+Operand<T>::operator%( IOperand const & rhs ) const {
 	if ( std::stod( rhs.toString() ) == 0 ) {
 		throw Operand<T>::FloatingPoint();
 	} else {
@@ -106,18 +118,18 @@ Operand<T>::~Operand( void ) {
 
 /* MEMBER FUNCTIONS ==========================================================*/
 
-template <class T>
-int								Operand<T>::getPrecision( void ) const {
+template <class T> int
+Operand<T>::getPrecision( void ) const {
 	return Operand<T>::precisions[ this->_type ];
 }
 
-template <class T>
-eOperandType			Operand<T>::getType( void ) const {
+template <class T> eOperandType
+Operand<T>::getType( void ) const {
 	return this->_type;
 }
 
-template <class T>
-std::string const	&Operand<T>::toString( void ) const {
+template <class T> std::string const &
+Operand<T>::toString( void ) const {
 	return this->_str;
 }
 

@@ -11,9 +11,10 @@
 
 # define END_OF_INPUT	";;"
 
-# define EXCEP_CANT_OPEN_FILE				"Exception : Can't open file : "
-# define EXCEP_UNKNOWN_INSTRUCTION	"Exception : Unknown instruction line : "
+# define EXCEP_CANT_OPEN_FILE					"Exception : Can't open file : "
+# define EXCEP_UNKNOWN_INSTRUCTION		"Exception : Unknown instruction line : "
 # define EXCEP_UNKNOWN_TYPE_OR_VALUE	"Exception : Unknown type or invalid value line : "
+# define EXCEP_INVALID_VALUE					"Exception : Invalid value line : "
 
 # define _CONCAT(A, B) A # B
 # define EVALUATOR(A, B) _CONCAT(A, B)
@@ -39,7 +40,7 @@ private:
 	) const;
 	int		_regValidSm(
 		int const line,
-		std::smatch &sm
+		std::string sm1
 	) const;
 
 	void	_printInput( void );// DEBUG
@@ -76,6 +77,12 @@ public:
 	class UnknownTypeOrValueException : public std::runtime_error {
 	public:
 		UnknownTypeOrValueException(const std::string& error_message);
+	};
+
+	/* INVALID VALUE EXCEPTION =================================================*/
+	class InvalidValueException : public std::runtime_error {
+	public:
+		InvalidValueException(const std::string& error_message);
 	};
 
 };

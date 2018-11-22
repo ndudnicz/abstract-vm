@@ -1,6 +1,7 @@
 #include <Cpu.class.hpp>
 #include <sstream>
 #include "regex_defines.hpp"
+#include <limits>
 
 /* STATIC VARIABLES ==========================================================*/
 
@@ -31,6 +32,8 @@ int		Cpu::run( int ac, char const **av ) {
 	} catch (Cpu::UnknownInstructionException &e) {
 		std::cout << e.what() << '\n';
 	} catch (Cpu::UnknownTypeOrValueException &e) {
+		std::cout << e.what() << '\n';
+	} catch (Cpu::InvalidValueException &e) {
 		std::cout << e.what() << '\n';
 	}
 	return 0;
@@ -89,9 +92,10 @@ int		Cpu::_validInput( void ) {
 
 	for (; it < this->_input.end(); it++, line++) {
 		try {
-			std::cout << *it << '\n'; // DEBUG
+			std::cout << "*it: "<< *it << '\n'; // DEBUG
 			(void)this->_regValidInstruction( line, *it, &sm );
-			(void)this->_regValidSm( line, sm );
+			std::cout << "sm[1]:"<< sm[1].str() << '\n'; // DEBUG
+			(void)this->_regValidSm( line, sm[1].str() );
 		} catch (...) {
 			throw ;
 		}
@@ -145,29 +149,95 @@ int		Cpu::_regValidInstruction(
 
 int		Cpu::_regValidSm(
 	int const line,
-	std::smatch &sm
+	std::string sm1
 ) const {
 	// std::cout << "valid sm ..." << '\n'; // DEBUG
 	std::regex	regInt(REG_INT);
+	std::regex	regFloat(REG_FLOAT);
 	std::regex	regDouble(REG_DOUBLE);
 	std::smatch	typeSm;
 
-	if ( std::regex_match( sm[1].str(), typeSm, regInt ) == true ) {
-		for (int i = 0; i < typeSm.size(); i++) {
-			std::cout << typeSm[i] << '\n'; // DEBUG
+	std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
+	if ( std::regex_match( sm1, typeSm, regInt ) == true ) {
+		int32_t zero = std::stoi(typeSm[2]);
+		std::cout << "typeSm[2]:" << zero << '\n'; // DEBUG
+		switch ( std::stoi(typeSm[1]) ) {
+			case 8:
+			if ( zero == 0 || typeSm[2].length() <= 4 ) {
+				int32_t const value = std::stoi(typeSm[2]);
+				if ( value >= std::numeric_limits<int8_t>::min() && value <= std::numeric_limits<int8_t>::max() ) {
+					return 0;
+				} else {
+					std::ostringstream	strs;
+					strs << line;
+					std::string					str1( EXCEP_INVALID_VALUE );
+					std::string					str2( strs.str() );
+					throw Cpu::InvalidValueException( str1 + str2 );
+				}
+			} else {
+				std::ostringstream	strs;
+				strs << line;
+				std::string					str1( EXCEP_INVALID_VALUE );
+				std::string					str2( strs.str() );
+				throw Cpu::InvalidValueException( str1 + str2 );
+			}
+			break;
+			case 16:
+			if ( zero == 0 || typeSm[2].length() <= 6 ) {
+				int32_t const value = std::stoi(typeSm[2]);
+				if ( value >= std::numeric_limits<int16_t>::min() && value <= std::numeric_limits<int16_t>::max() ) {
+					return 0;
+				} else {
+					std::ostringstream	strs;
+					strs << line;
+					std::string					str1( EXCEP_INVALID_VALUE );
+					std::string					str2( strs.str() );
+					throw Cpu::InvalidValueException( str1 + str2 );
+				}
+			} else {
+				std::ostringstream	strs;
+				strs << line;
+				std::string					str1( EXCEP_INVALID_VALUE );
+				std::string					str2( strs.str() );
+				throw Cpu::InvalidValueException( str1 + str2 );
+			}
+			break;
+			case 32:
+			if ( zero == 0 || typeSm[2].length() <= 11 ) {
+				try {
+					std::stoi(typeSm[2]);
+				} catch ( const std::out_of_range& oor ) {
+					std::ostringstream	strs;
+					strs << line;
+					std::string					str1( EXCEP_INVALID_VALUE );
+					std::string					str2( strs.str() );
+					throw Cpu::InvalidValueException( str1 + str2 );
+				}
+			} else {
+				std::ostringstream	strs;
+				strs << line;
+				std::string					str1( EXCEP_INVALID_VALUE );
+				std::string					str2( strs.str() );
+				throw Cpu::InvalidValueException( str1 + str2 );
+			}
+			break;
 		}
-	} else if ( std::regex_match( sm[1].str(), typeSm, regDouble ) == true ) {
+	} else if ( std::regex_match( sm1, typeSm, regFloat ) == true ) {
 		for (int i = 0; i < typeSm.size(); i++) {
-			std::cout << typeSm[i] << '\n'; // DEBUG
+			std::cout << "typesm float: " << typeSm[i] << '\n'; // DEBUG
+		}
+	} else if ( std::regex_match( sm1, typeSm, regDouble ) == true ) {
+		for (int i = 0; i < typeSm.size(); i++) {
+			std::cout << "typesm double: " << typeSm[i] << '\n'; // DEBUG
 		}
 	} else {
+		std::cout << "heeeeere" << '\n';
 		std::ostringstream	strs;
 		strs << line;
 		std::string					str1( EXCEP_UNKNOWN_TYPE_OR_VALUE );
 		std::string					str2( strs.str() );
-		throw Cpu::UnknownInstructionException( str1 + str2 );
+		throw Cpu::UnknownTypeOrValueException( str1 + str2 );
 	}
-
 	return 0;
 }
 
@@ -199,4 +269,7 @@ Cpu::UnknownInstructionException::UnknownInstructionException( const std::string
 runtime_error(error_message) {}
 
 Cpu::UnknownTypeOrValueException::UnknownTypeOrValueException( const std::string& error_message ) :
+runtime_error(error_message) {}
+
+Cpu::InvalidValueException::InvalidValueException( const std::string& error_message ) :
 runtime_error(error_message) {}
