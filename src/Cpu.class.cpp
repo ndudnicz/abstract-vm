@@ -93,9 +93,10 @@ int		Cpu::_validInput( void ) {
 	for (; it < this->_input.end(); it++, line++) {
 		try {
 			std::cout << "*it: "<< *it << '\n'; // DEBUG
-			(void)this->_regValidInstruction( line, *it, &sm );
-			std::cout << "sm[1]:"<< sm[1].str() << '\n'; // DEBUG
-			(void)this->_regValidSm( line, sm[1].str() );
+			if (this->_regValidInstruction( line, *it, &sm ) == 0 ) {
+				std::cout << "sm[1]:"<< sm[1].str() << '\n'; // DEBUG
+				(void)this->_regValidSm( line, sm[1].str() );
+			}
 		} catch (...) {
 			throw ;
 		}
@@ -124,6 +125,7 @@ int		Cpu::_regValidInstruction(
 	if ( (std::regex_match( str, *sm, regPush) == true  ||
 	std::regex_match( str, *sm, regAssert ) == true) && sm->size() == 2 ) {
 		std::cout << "reg found : push or assert" << '\n'; // DEBUG
+		return 0;
 	} else if ( ( std::regex_match( str, *sm, regPop ) == true ||
 	std::regex_match( str, *sm, regDump ) == true ||
 	std::regex_match( str, *sm, regAdd ) == true ||
@@ -136,7 +138,8 @@ int		Cpu::_regValidInstruction(
 	std::regex_match( str, *sm, regComment ) == true ) && sm->size() == 1 ) {
 		std::cout << "reg found : other" << '\n'; // DEBUG
 		std::smatch ret;
-		*sm = ret;
+		// *sm = ret;
+		return 1;
 	} else {
 		std::ostringstream	strs;
 		strs << line;
@@ -144,7 +147,6 @@ int		Cpu::_regValidInstruction(
 		std::string					str2( strs.str() );
 		throw Cpu::UnknownInstructionException( str1 + str2 );
 	}
-	return 0;
 }
 
 int		Cpu::_regValidSm(
