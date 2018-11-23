@@ -13,7 +13,7 @@
 
 # define EXCEP_CANT_OPEN_FILE					"Exception : Can't open file : "
 # define EXCEP_UNKNOWN_INSTRUCTION		"Exception : Unknown instruction line : "
-# define EXCEP_UNKNOWN_TYPE_OR_VALUE	"Exception : Unknown type or invalid value line : "
+# define EXCEP_UNKNOWN_TYPE						"Exception : Unknown type line : "
 # define EXCEP_INVALID_VALUE					"Exception : Invalid value line : "
 
 # define _CONCAT(A, B) A # B

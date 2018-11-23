@@ -20,7 +20,7 @@ int		main(int ac, char const **av) {
 	// std::cout << opdouble->toString() << std::endl;
 
 	Cpu cpu;
-	(void)cpu.run(ac, av);
+	static_cast<void>( cpu.run(ac, av) );
 	// IOperand const *result = op + op2;
 	// std::cout << (op + op2)->toString() << '\n';
 	// std::cout << (op - op2)->toString() << '\n';

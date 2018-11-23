@@ -5,27 +5,15 @@
 #include <iomanip>
 
 /* STATIC VARIABLES ==========================================================*/
-template <class T>
-int const	Operand<T>::precisions[5] = {0, 0, 0, 7, 16};
+int const	IOperand::precisions[5] = {0, 0, 0, 7, 16};
+
 
 /* CONSTRUCTORS ==============================================================*/
 
 template <class T>
-Operand<T>::Operand( std::string str, eOperandType type ):
+Operand<T>::Operand( std::string const & str, eOperandType type ):
 _type( type ),
 _str( str ) {
-	// switch (type) {
-	// 	case INT8:
-	// 	break;
-	// 	case INT16:
-	// 	break;
-	// 	case INT32:
-	// 	break;
-	// 	case FLOAT:
-	// 	break;
-	// 	case DOUBLE:
-	// 	break;
-	// }
 }
 
 template <class T>

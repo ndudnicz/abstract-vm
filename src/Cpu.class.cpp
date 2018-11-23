@@ -2,6 +2,7 @@
 #include <sstream>
 #include "regex_defines.hpp"
 #include <limits>
+#include "IOperand.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
 
@@ -20,11 +21,11 @@ int		Cpu::run( int ac, char const **av ) {
 	// read file
 	try {
 		if (ac > 1) {
-			(void)this->_getFile(av[1]);
+			static_cast<void>(this->_getFile(av[1]));
 		} else {
-			(void)this->_getStdin();
+			static_cast<void>(this->_getStdin());
 		}
-		(void)this->_generateStack();
+		static_cast<void>(this->_validInput());
 	} catch ( Cpu::CantOpenFileException &e ) {
 		std::cout << e.what() << '\n';
 	} catch (Cpu::DidntGetEndOfInputException &e) {
@@ -73,18 +74,6 @@ int		Cpu::_getFile( char const *const filename ) {
 	return 0;
 }
 
-int		Cpu::_generateStack( void ) {
-	eOperandType												eop;
-	std::string													value;
-
-	try {
-		(void)this->_validInput();
-	} catch (...) {
-		throw ;
-	}
-	return 0;
-}
-
 int		Cpu::_validInput( void ) {
 	std::vector<std::string>::iterator	it = this->_input.begin();
 	int																	line = 1;
@@ -95,7 +84,7 @@ int		Cpu::_validInput( void ) {
 			std::cout << "*it: "<< *it << '\n'; // DEBUG
 			if (this->_regValidInstruction( line, *it, &sm ) == 0 ) {
 				std::cout << "sm[1]:"<< sm[1].str() << '\n'; // DEBUG
-				(void)this->_regValidSm( line, sm[1].str() );
+				static_cast<void>(this->_regValidSm( line, sm[1].str() ));
 			}
 		} catch (...) {
 			throw ;
@@ -122,7 +111,7 @@ int		Cpu::_regValidInstruction(
 	std::regex	regExit(REG_EXIT);
 	std::regex	regComment(REG_COMMENT);
 
-	if ( (std::regex_match( str, *sm, regPush) == true  ||
+	if ( ( std::regex_match( str, *sm, regPush ) == true  ||
 	std::regex_match( str, *sm, regAssert ) == true) && sm->size() == 2 ) {
 		std::cout << "reg found : push or assert" << '\n'; // DEBUG
 		return 0;
@@ -160,13 +149,17 @@ int		Cpu::_regValidSm(
 	std::smatch	typeSm;
 
 	std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
+
+	/* INT ===================================================================*/
 	if ( std::regex_match( sm1, typeSm, regInt ) == true ) {
-		int32_t zero = std::stoi(typeSm[2]);
+		int32_t zero = std::stoi( typeSm[2] );
 		std::cout << "typeSm[2]:" << zero << '\n'; // DEBUG
-		switch ( std::stoi(typeSm[1]) ) {
+		switch ( std::stoi( typeSm[1] ) ) {
+
+			/* INT8 ================================================================*/
 			case 8:
 			if ( zero == 0 || typeSm[2].length() <= 4 ) {
-				int32_t const value = std::stoi(typeSm[2]);
+				int32_t const value = std::stoi( typeSm[2] );
 				if ( value >= std::numeric_limits<int8_t>::min() && value <= std::numeric_limits<int8_t>::max() ) {
 					return 0;
 				} else {
@@ -184,9 +177,11 @@ int		Cpu::_regValidSm(
 				throw Cpu::InvalidValueException( str1 + str2 );
 			}
 			break;
+
+			/* INT16 ===============================================================*/
 			case 16:
 			if ( zero == 0 || typeSm[2].length() <= 6 ) {
-				int32_t const value = std::stoi(typeSm[2]);
+				int32_t const value = std::stoi( typeSm[2] );
 				if ( value >= std::numeric_limits<int16_t>::min() && value <= std::numeric_limits<int16_t>::max() ) {
 					return 0;
 				} else {
@@ -204,10 +199,12 @@ int		Cpu::_regValidSm(
 				throw Cpu::InvalidValueException( str1 + str2 );
 			}
 			break;
+
+			/* INT32 ===============================================================*/
 			case 32:
 			if ( zero == 0 || typeSm[2].length() <= 11 ) {
 				try {
-					std::stoi(typeSm[2]);
+					std::stoi( typeSm[2] );
 				} catch ( const std::out_of_range& oor ) {
 					std::ostringstream	strs;
 					strs << line;
@@ -224,19 +221,60 @@ int		Cpu::_regValidSm(
 			}
 			break;
 		}
+
+	/* FLOAT ===================================================================*/
 	} else if ( std::regex_match( sm1, typeSm, regFloat ) == true ) {
-		for (int i = 0; i < typeSm.size(); i++) {
-			std::cout << "typesm float: " << typeSm[i] << '\n'; // DEBUG
+		// for (int i = 0; i < typeSm.size(); i++) {
+		// 	std::cout << "typesm float: " << typeSm[i] << '\n'; // DEBUG
+		// }
+		float zero = std::stof( typeSm[2] );
+		if ( zero == 0 || typeSm[2].length() <= ( IOperand::precisions[ FLOAT ] + 2 ) ) {
+			try {
+				std::stof( typeSm[2] );
+			} catch ( const std::out_of_range& oor ) {
+				std::ostringstream	strs;
+				strs << line;
+				std::string					str1( EXCEP_INVALID_VALUE );
+				std::string					str2( strs.str() );
+				throw Cpu::InvalidValueException( str1 + str2 );
+			}
+		} else {
+			std::ostringstream	strs;
+			strs << line;
+			std::string					str1( EXCEP_INVALID_VALUE );
+			std::string					str2( strs.str() );
+			throw Cpu::InvalidValueException( str1 + str2 );
 		}
+
+	/* DOUBLE ==================================================================*/
 	} else if ( std::regex_match( sm1, typeSm, regDouble ) == true ) {
-		for (int i = 0; i < typeSm.size(); i++) {
-			std::cout << "typesm double: " << typeSm[i] << '\n'; // DEBUG
+		// for (int i = 0; i < typeSm.size(); i++) {
+		// 	std::cout << "typesm double: " << typeSm[i] << '\n'; // DEBUG
+		// }
+		double zero = std::stod( typeSm[2] );
+		if ( zero == 0 || typeSm[2].length() <= ( IOperand::precisions[ DOUBLE ] + 2 ) ) {
+			try {
+				std::stof( typeSm[2] );
+			} catch ( const std::out_of_range& oor ) {
+				std::ostringstream	strs;
+				strs << line;
+				std::string					str1( EXCEP_INVALID_VALUE );
+				std::string					str2( strs.str() );
+				throw Cpu::InvalidValueException( str1 + str2 );
+			}
+		} else {
+			std::ostringstream	strs;
+			strs << line;
+			std::string					str1( EXCEP_INVALID_VALUE );
+			std::string					str2( strs.str() );
+			throw Cpu::InvalidValueException( str1 + str2 );
 		}
+
 	} else {
-		std::cout << "heeeeere" << '\n';
+		std::cout << "heeeeere" << '\n'; // DEBUG
 		std::ostringstream	strs;
 		strs << line;
-		std::string					str1( EXCEP_UNKNOWN_TYPE_OR_VALUE );
+		std::string					str1( EXCEP_UNKNOWN_TYPE );
 		std::string					str2( strs.str() );
 		throw Cpu::UnknownTypeOrValueException( str1 + str2 );
 	}

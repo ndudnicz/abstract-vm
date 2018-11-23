@@ -19,6 +19,8 @@ private:
 protected:
 
 public:
+	static int const			precisions[5];
+
 	virtual int						getPrecision( void ) const = 0;
 	virtual eOperandType	getType( void ) const = 0;
 

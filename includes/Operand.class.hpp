@@ -20,9 +20,7 @@ protected:
 
 public:
 
-	static int const	precisions[5];
-
-	Operand( std::string str, eOperandType type );
+	Operand( std::string const & str, eOperandType type );
 	Operand( Operand const & src );
 	~Operand( void );
 

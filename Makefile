@@ -21,6 +21,9 @@ PATH_INCLUDES = includes
 SRC = main.cpp \
 Operand.class.cpp \
 Cpu.class.cpp \
+add_overflow.cpp \
+sub_overflow.cpp \
+mul_overflow.cpp \
 
 # OBJECTS LIST ================================================================#
 
