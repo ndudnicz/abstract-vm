@@ -45,7 +45,10 @@ private:
 	std::vector<std::string>	_input;
 	std::vector<IOperand*>		_stack;
 
-	eInstruction		_getInstruction( std::string const str );
+	eInstruction		_getInstruction(
+		std::string const str,
+		std::smatch *sm
+	);
 	int							_getStdin( void );
 	int							_getFile( char const *const filename );
 	int							_generateStack( void );
@@ -54,7 +57,7 @@ private:
 		int const line,
 		std::string const str,
 		std::smatch *sm
-	) const;
+	);
 	int							_regValidSm(
 		int const line,
 		std::string sm1
@@ -63,6 +66,15 @@ private:
 
 	/* INSTRUCTIONS ============================================================*/
 	int		_push( std::smatch *sm );
+	int		_assert( std::smatch *sm );
+	int		_pop( void );
+	int		_dump( void );
+	int		_add( void );
+	int		_sub( void );
+	int		_mul( void );
+	int		_div( void );
+	int		_mod( void );
+	int		_print( void );
 
 	void	_printInput( void );// DEBUG
 

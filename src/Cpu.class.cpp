@@ -2,7 +2,7 @@
 #include <sstream>
 #include "regex_defines.hpp"
 #include <limits>
-#include "IOperand.hpp"
+#include "Operand.class.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
 
@@ -144,13 +144,13 @@ int		Cpu::_regValidInstruction(
 	int const line,
 	std::string const str,
 	std::smatch *sm
-) const {
+) {
 	eInstruction const i = this->_getInstruction( str, sm );
 
 	if ( i <= EIASSERT && sm->size() == 2 ) {
 		std::cout << "reg found : push or assert" << '\n'; // DEBUG
 		return 0;
-	} else if ( i <= EICOMMENT ) && sm->size() == 1 ) {
+	} else if ( i <= EICOMMENT && sm->size() == 1 ) {
 		std::cout << "reg found : other" << '\n'; // DEBUG
 		std::smatch ret;
 		*sm = ret;
@@ -316,15 +316,14 @@ int		Cpu::_regValidSm(
 	return 0;
 }
 
-int		Cpu::_exec( void ) const {
+int		Cpu::_exec( void ) {
 	std::vector<std::string>::iterator	it = this->_input.begin();
 	std::smatch													sm;
-	Operand															*o;
+	IOperand														*o;
 
-	itstack = this->_stack.begin();
 	for (; it < this->_input.end(); it++) {
 		try {
-			switch ( this->_getInstruction( line, *it, &sm ) ) {
+			switch ( this->_getInstruction( *it, &sm ) ) {
 				case EIPUSH:
 				this->_push( &sm );
 				break;
@@ -355,6 +354,12 @@ int		Cpu::_exec( void ) const {
 				case EIPRINT:
 				this->_print();
 				break;
+				case EICOMMENT:
+				this->_print();
+				break;
+				case EIINVALID:
+				this->_print();
+				break;
 				case EIEXIT:
 				return 0;
 			}
@@ -366,28 +371,66 @@ int		Cpu::_exec( void ) const {
 }
 
 int Cpu::_push( std::smatch *sm ) {
-	std::vector<IOperand*>	it;
+	std::vector<IOperand*>::iterator	it;
+	IOperand													*o;
 
-	if ( sm.size() > 1 ) {
-		switch ( std::stoi( sm[1] ) ) {
+	it = this->_stack.begin();
+	if ( sm->size() > 1 ) {
+		switch ( std::stoi( (*sm)[1] ) ) {
 			case INT8:
-			o = new Operand<int8_t>( sm[2], INT8 );
+			o = new Operand<int8_t>( (*sm)[2], INT8 );
 			break;
 			case INT16:
-			o = new Operand<int16_t>( sm[2], INT16 );
+			o = new Operand<int16_t>( (*sm)[2], INT16 );
 			break;
 			case INT32:
-			o = new Operand<int32_t>( sm[2], INT32 );
+			o = new Operand<int32_t>( (*sm)[2], INT32 );
 			break;
 		}
 	} else {
-		if ( !sm[0].compare( std::string( "float" ) ) ) {
-			o = new Operand<float>( sm[2], FLOAT );
+		if ( !(std::string( "float" )).compare( (*sm)[0] ) ) {
+			o = new Operand<float>( (*sm)[2], FLOAT );
 		} else {
-			o = new Operand<double>( sm[2], DOUBLE );
+			o = new Operand<double>( (*sm)[2], DOUBLE );
 		}
 	}
-	this->_stack.insert( itstack, o );
+	this->_stack.insert( it, o );
+	return 0;
+}
+
+int Cpu::_assert( std::smatch *sm ) {
+	return 0;
+}
+
+int Cpu::_add( void ) {
+	return 0;
+}
+
+int Cpu::_div( void ) {
+	return 0;
+}
+
+int Cpu::_mod( void ) {
+	return 0;
+}
+int Cpu::_mul( void ) {
+	return 0;
+}
+
+int Cpu::_pop( void ) {
+	return 0;
+}
+
+int Cpu::_sub( void ) {
+	return 0;
+}
+
+int Cpu::_dump( void ) {
+	return 0;
+}
+
+int Cpu::_print( void ) {
+	return 0;
 }
 
 // DEBUG
