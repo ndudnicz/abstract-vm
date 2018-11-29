@@ -20,6 +20,22 @@
 # define EVALUATOR(A, B) _CONCAT(A, B)
 # define CONCAT(A, B) EVALUATOR(A, B)
 
+enum eInstruction {
+	EIPUSH = 0,
+	EIASSERT,
+	EIPOP,
+	EIDUMP,
+	EIADD,
+	EISUB,
+	EIMUL,
+	EIDIV,
+	EIMOD,
+	EIPRINT,
+	EIEXIT,
+	EICOMMENT,
+	EIINVALID
+};
+
 class Cpu {
 
 private:
@@ -29,19 +45,24 @@ private:
 	std::vector<std::string>	_input;
 	std::vector<IOperand*>		_stack;
 
-	int		_getStdin( void );
-	int		_getFile( char const *const filename );
-	int		_generateStack( void );
-	int		_validInput( void );
-	int		_regValidInstruction(
+	eInstruction		_getInstruction( std::string const str );
+	int							_getStdin( void );
+	int							_getFile( char const *const filename );
+	int							_generateStack( void );
+	int							_validInput( void );
+	int							_regValidInstruction(
 		int const line,
 		std::string const str,
 		std::smatch *sm
 	) const;
-	int		_regValidSm(
+	int							_regValidSm(
 		int const line,
 		std::string sm1
 	) const;
+	int							_exec( void );
+
+	/* INSTRUCTIONS ============================================================*/
+	int		_push( std::smatch *sm );
 
 	void	_printInput( void );// DEBUG
 
