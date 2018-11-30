@@ -159,6 +159,14 @@ public:
 		virtual const char *what( void ) const throw();
 	};
 
+	/* OPERATION UNDERFLOW EXCEPTION ===========================================*/
+	class PrintWrongTypeException : public std::exception {
+	public:
+		PrintWrongTypeException( void ) throw();
+		~PrintWrongTypeException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
 };
 
 #endif

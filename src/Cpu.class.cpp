@@ -107,6 +107,8 @@ int		Cpu::run( int ac, char const **av ) {
 		std::cout << e.what() << std::endl;
 	} catch (Cpu::OperationUnderflowException &e) {
 		std::cout << e.what() << std::endl;
+	} catch (Cpu::PrintWrongTypeException &e) {
+		std::cout << e.what() << std::endl;
 	}
 	return 0;
 }
@@ -180,7 +182,7 @@ int		Cpu::_regValidInstruction(
 	if ( i <= EIASSERT ) {
 		return 0;
 	} else if ( i <= EICOMMENT ) {
-		std::cout << "reg found : other" << '\n'; // DEBUG
+		// std::cout << "reg found : other" << '\n'; // DEBUG
 		return 1;
 	} else {
 		std::ostringstream	strs;
@@ -200,7 +202,7 @@ int		Cpu::_regValidSm(
 	std::regex	regDouble(REG_DOUBLE);
 	std::smatch	typeSm;
 
-	std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
+	// std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
 
 	/* INT ===================================================================*/
 	if ( std::regex_match( sm1, typeSm, regInt ) == true ) {
@@ -357,7 +359,7 @@ int		Cpu::_exec( void ) {
 			try {
 				switch ( this->_getInstruction( *it, &sm ) ) {
 					case EIPUSH:
-					std::cout << "exec: " << sm[1] << '\n'; // DEBUG
+					// std::cout << "exec: " << sm[1] << '\n'; // DEBUG
 					this->_push( sm[1] );
 					break;
 					case EIASSERT:
@@ -388,10 +390,8 @@ int		Cpu::_exec( void ) {
 					this->_print();
 					break;
 					case EICOMMENT:
-					this->_print();
 					break;
 					case EIINVALID:
-					this->_print();
 					break;
 					case EIEXIT:
 					return 0;
@@ -404,7 +404,6 @@ int		Cpu::_exec( void ) {
 	return 0;
 }
 
-#include <stdio.h> // DEBUG
 int Cpu::_push( std::string str ) {
 	std::vector<IOperand*>::iterator	it;
 	IOperand													*o;
@@ -450,9 +449,9 @@ int Cpu::_assert( std::string str ) {
 	std::regex	regDouble(REG_DOUBLE);
 
 	it = this->_stack.begin();
-	std::cout << "asserting: " << str << '\n'; // DEBUG
+	// std::cout << "asserting: " << str << '\n'; // DEBUG
 	if ( std::regex_match( str, typeSm, regInt ) == true ) {
-		std::cout << "asserting: " << typeSm[2] << '\n'; // DEBUG
+		// std::cout << "asserting: " << typeSm[2] << '\n'; // DEBUG
 		if ( std::stod( (*it)->toString() ) != std::stod( typeSm[2] ) ) {
 			throw Cpu::AssertFailedException();
 		}
@@ -536,6 +535,15 @@ int Cpu::_dump( void ) {
 }
 
 int Cpu::_print( void ) {
+	if ( this->_stack.size() > 0 ) {
+		std::vector<IOperand*>::iterator		it = this->_stack.begin();
+		if ( (*it)->getType() == INT8 ) {
+			char const c = static_cast<char>( std::stoi( (*it)->toString() ) );
+			std::cout << c << std::endl;
+		} else {
+			throw Cpu::PrintWrongTypeException();
+		}
+	}
 	return 0;
 }
 
@@ -600,4 +608,10 @@ Cpu::OperationUnderflowException::OperationUnderflowException( void ) throw() {}
 Cpu::OperationUnderflowException::~OperationUnderflowException( void ) throw() {}
 const char * Cpu::OperationUnderflowException::what( void ) const throw() {
 	return "Exception : operation underflow.";
+}
+
+Cpu::PrintWrongTypeException::PrintWrongTypeException( void ) throw() {}
+Cpu::PrintWrongTypeException::~PrintWrongTypeException( void ) throw() {}
+const char * Cpu::PrintWrongTypeException::what( void ) const throw() {
+	return "Exception : trying to print wrong type (must be int8).";
 }
