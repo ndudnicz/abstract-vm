@@ -3,6 +3,7 @@
 #include "regex_defines.hpp"
 #include <limits>
 #include "Operand.class.hpp"
+#include <iomanip>
 
 /* STATIC VARIABLES ==========================================================*/
 
@@ -87,15 +88,25 @@ int		Cpu::run( int ac, char const **av ) {
 		static_cast<void>(this->_validInput());
 		static_cast<void>(this->_exec());
 	} catch ( Cpu::CantOpenFileException &e ) {
-		std::cout << e.what() << '\n';
+		std::cout << e.what() << std::endl;
 	} catch (Cpu::DidntGetEndOfInputException &e) {
-		std::cout << e.what() << '\n';
+		std::cout << e.what() << std::endl;
 	} catch (Cpu::UnknownInstructionException &e) {
-		std::cout << e.what() << '\n';
-	} catch (Cpu::UnknownTypeOrValueException &e) {
-		std::cout << e.what() << '\n';
+		std::cout << e.what() << std::endl;
+	} catch (Cpu::UnknownTypeException &e) {
+		std::cout << e.what() << std::endl;
 	} catch (Cpu::InvalidValueException &e) {
-		std::cout << e.what() << '\n';
+		std::cout << e.what() << std::endl;
+	} catch (Cpu::AssertFailedException &e) {
+		std::cout << e.what() << std::endl;
+	} catch (Cpu::PopEmptyStackException &e) {
+		std::cout << e.what() << std::endl;
+	} catch (Cpu::NotEnoughElementsInStackException &e) {
+		std::cout << e.what() << std::endl;
+	} catch (Cpu::OperationOverflowException &e) {
+		std::cout << e.what() << std::endl;
+	} catch (Cpu::OperationUnderflowException &e) {
+		std::cout << e.what() << std::endl;
 	}
 	return 0;
 }
@@ -141,13 +152,15 @@ int		Cpu::_validInput( void ) {
 	std::string													matchstr2("");
 
 	for (; it < this->_input.end(); it++, line++) {
-		try {
-			std::cout << "*it: "<< *it << '\n'; // DEBUG
-			if ( this->_regValidInstruction( line, *it, &matchstr1, &matchstr2 ) == 0 ) {
-				static_cast<void>(this->_regValidSm( line, matchstr2 ));
+		if ( (*it).length() > 0 ) {
+			try {
+				std::cout << "*it: "<< *it << '\n'; // DEBUG
+				if ( this->_regValidInstruction( line, *it, &matchstr1, &matchstr2 ) == 0 ) {
+					static_cast<void>(this->_regValidSm( line, matchstr2 ));
+				}
+			} catch (...) {
+				throw ;
 			}
-		} catch (...) {
-			throw ;
 		}
 	}
 	return 0;
@@ -279,19 +292,20 @@ int		Cpu::_regValidSm(
 
 		/* FLOAT ===================================================================*/
 	} else if ( std::regex_match( sm1, typeSm, regFloat ) == true ) {
-		float const value = std::stof( typeSm[1] );
 
-		if ( value == 0 || typeSm[1].length() <= ( IOperand::precisions[ FLOAT ] + 2 ) ) {
-			try {
-				std::stof( typeSm[1] );
-			} catch ( const std::out_of_range& oor ) {
+		try {
+			float const value = std::stof( typeSm[1] );
+			if ( value == 0 || typeSm[1].length() <= ( IOperand::precisions[ FLOAT ] + 2 ) ) {
+				return 0;
+			} else {
 				std::ostringstream	strs;
 				strs << line;
 				std::string					str1( EXCEP_INVALID_VALUE );
 				std::string					str2( strs.str() );
 				throw Cpu::InvalidValueException( str1 + str2 );
 			}
-		} else {
+
+		} catch ( const std::out_of_range& oor ) {
 			std::ostringstream	strs;
 			strs << line;
 			std::string					str1( EXCEP_INVALID_VALUE );
@@ -301,19 +315,20 @@ int		Cpu::_regValidSm(
 
 		/* DOUBLE ==================================================================*/
 	} else if ( std::regex_match( sm1, typeSm, regDouble ) == true ) {
-		double const value = std::stod( typeSm[1] );
 
-		if ( value == 0 || typeSm[1].length() <= ( IOperand::precisions[ DOUBLE ] + 2 ) ) {
-			try {
-				std::stof( typeSm[1] );
-			} catch ( const std::out_of_range& oor ) {
+		try {
+			double const value = std::stod( typeSm[1] );
+			if ( value == 0 || typeSm[1].length() <= ( IOperand::precisions[ DOUBLE ] + 2 ) ) {
+				return 0;
+			} else {
 				std::ostringstream	strs;
 				strs << line;
 				std::string					str1( EXCEP_INVALID_VALUE );
 				std::string					str2( strs.str() );
 				throw Cpu::InvalidValueException( str1 + str2 );
 			}
-		} else {
+
+		} catch ( const std::out_of_range& oor ) {
 			std::ostringstream	strs;
 			strs << line;
 			std::string					str1( EXCEP_INVALID_VALUE );
@@ -327,7 +342,7 @@ int		Cpu::_regValidSm(
 		strs << line;
 		std::string					str1( EXCEP_UNKNOWN_TYPE );
 		std::string					str2( strs.str() );
-		throw Cpu::UnknownTypeOrValueException( str1 + str2 );
+		throw Cpu::UnknownTypeException( str1 + str2 );
 	}
 	return 0;
 }
@@ -338,50 +353,52 @@ int		Cpu::_exec( void ) {
 	IOperand														*o;
 
 	for (; it < this->_input.end(); it++) {
-		try {
-			switch ( this->_getInstruction( *it, &sm ) ) {
-				case EIPUSH:
-				std::cout << "exec: " << sm[1] << '\n'; // DEBUG
-				this->_push( sm[1] );
-				break;
-				case EIASSERT:
-				this->_assert( sm[1] );
-				break;
-				case EIPOP:
-				this->_pop();
-				break;
-				case EIDUMP:
-				this->_dump();
-				break;
-				case EIADD:
-				this->_add();
-				break;
-				case EISUB:
-				this->_sub();
-				break;
-				case EIMUL:
-				this->_mul();
-				break;
-				case EIDIV:
-				this->_div();
-				break;
-				case EIMOD:
-				this->_mod();
-				break;
-				case EIPRINT:
-				this->_print();
-				break;
-				case EICOMMENT:
-				this->_print();
-				break;
-				case EIINVALID:
-				this->_print();
-				break;
-				case EIEXIT:
-				return 0;
+		if ( (*it).length() > 0 ) {
+			try {
+				switch ( this->_getInstruction( *it, &sm ) ) {
+					case EIPUSH:
+					std::cout << "exec: " << sm[1] << '\n'; // DEBUG
+					this->_push( sm[1] );
+					break;
+					case EIASSERT:
+					this->_assert( sm[1] );
+					break;
+					case EIPOP:
+					this->_pop();
+					break;
+					case EIDUMP:
+					this->_dump();
+					break;
+					case EIADD:
+					this->_add();
+					break;
+					case EISUB:
+					this->_sub();
+					break;
+					case EIMUL:
+					this->_mul();
+					break;
+					case EIDIV:
+					this->_div();
+					break;
+					case EIMOD:
+					this->_mod();
+					break;
+					case EIPRINT:
+					this->_print();
+					break;
+					case EICOMMENT:
+					this->_print();
+					break;
+					case EIINVALID:
+					this->_print();
+					break;
+					case EIEXIT:
+					return 0;
+				}
+			} catch (...) {
+				throw ;
 			}
-		} catch (...) {
-			throw ;
 		}
 	}
 	return 0;
@@ -397,9 +414,7 @@ int Cpu::_push( std::string str ) {
 	std::regex	regDouble(REG_DOUBLE);
 
 	it = this->_stack.begin();
-	std::cout << "pushing: " << str << '\n'; // DEBUG
 	if ( std::regex_match( str, typeSm, regInt ) == true ) {
-	std::cout << "pushing: " << typeSm[2] << '\n'; // DEBUG
 
 		switch ( std::stoi( typeSm[1] ) ) {
 			/* INT8 ================================================================*/
@@ -416,65 +431,107 @@ int Cpu::_push( std::string str ) {
 			break;
 		}
 
-		/* FLOAT ===================================================================*/
+		/* FLOAT =================================================================*/
 	} else if ( std::regex_match( str, typeSm, regFloat ) == true ) {
 		o = new Operand<float>( typeSm[1], FLOAT );
-		/* DOUBLE ==================================================================*/
-	} else {
+		/* DOUBLE ================================================================*/
+	} else if ( std::regex_match( str, typeSm, regDouble ) == true ) {
 		o = new Operand<double>( typeSm[1], DOUBLE );
 	}
 	this->_stack.insert( it, o );
-
-	printf("stack: %d\n", this->_stack.size()); // DEBUG
-
-	// if ( sm->size() > 1 ) {
-	// 	switch ( std::stoi( (*sm)[1] ) ) {
-	// 		case INT8:
-	// 		case INT16:
-	// 		o = new Operand<int16_t>( (*sm)[2], INT16 );
-	// 		break;
-	// 		case INT32:
-	// 		o = new Operand<int32_t>( (*sm)[2], INT32 );
-	// 		break;
-	// 	}
-	// } else {
-	// 	if ( !(std::string( "float" )).compare( (*sm)[0] ) ) {
-	// 		o = new Operand<float>( (*sm)[2], FLOAT );
-	// 	} else {
-	// 		o = new Operand<double>( (*sm)[2], DOUBLE );
-	// 	}
-	// }
 	return 0;
 }
 
 int Cpu::_assert( std::string str ) {
+	std::vector<IOperand*>::iterator	it;
+	std::smatch												typeSm;
+	std::regex	regInt(REG_INT);
+	std::regex	regFloat(REG_FLOAT);
+	std::regex	regDouble(REG_DOUBLE);
+
+	it = this->_stack.begin();
+	std::cout << "asserting: " << str << '\n'; // DEBUG
+	if ( std::regex_match( str, typeSm, regInt ) == true ) {
+		std::cout << "asserting: " << typeSm[2] << '\n'; // DEBUG
+		if ( std::stod( (*it)->toString() ) != std::stod( typeSm[2] ) ) {
+			throw Cpu::AssertFailedException();
+		}
+		/* FLOAT ===================================================================*/
+	} else if ( std::regex_match( str, typeSm, regFloat ) == true ) {
+		if ( std::stod( (*it)->toString() ) != std::stod( typeSm[1] ) ) {
+			throw Cpu::AssertFailedException();
+		}
+		/* DOUBLE ==================================================================*/
+	} else if ( std::regex_match( str, typeSm, regDouble ) == true ) {
+		if ( std::stod( (*it)->toString() ) != std::stod( typeSm[1] ) ) {
+			throw Cpu::AssertFailedException();
+		}
+	}
 	return 0;
 }
 
 int Cpu::_add( void ) {
-	return 0;
+	if ( this->_stack.size() > 1 ) {
+		return 0;
+	} else {
+		throw Cpu::NotEnoughElementsInStackException();
+	}
 }
 
 int Cpu::_div( void ) {
-	return 0;
+	if ( this->_stack.size() > 1 ) {
+		return 0;
+	} else {
+		throw Cpu::NotEnoughElementsInStackException();
+	}
 }
 
 int Cpu::_mod( void ) {
-	return 0;
+	if ( this->_stack.size() > 1 ) {
+		return 0;
+	} else {
+		throw Cpu::NotEnoughElementsInStackException();
+	}
 }
 int Cpu::_mul( void ) {
-	return 0;
+	if ( this->_stack.size() > 1 ) {
+		return 0;
+	} else {
+		throw Cpu::NotEnoughElementsInStackException();
+	}
 }
 
 int Cpu::_pop( void ) {
-	return 0;
+	if ( this->_stack.size() > 0 ) {
+		this->_stack.erase(this->_stack.begin());
+		return 0;
+	} else {
+		throw Cpu::PopEmptyStackException();
+	}
 }
 
 int Cpu::_sub( void ) {
-	return 0;
+	if ( this->_stack.size() > 1 ) {
+		return 0;
+	} else {
+		throw Cpu::NotEnoughElementsInStackException();
+	}
 }
 
 int Cpu::_dump( void ) {
+	std::vector<IOperand*>::iterator	it = this->_stack.begin();
+
+	for (; it != this->_stack.end(); it++) {
+		std::ostringstream	strs;
+		if ( (*it)->getType() < FLOAT ) {
+			strs << std::stoi( (*it)->toString() );
+		} else if ( (*it)->getType() < DOUBLE ) {
+			strs << std::setprecision( (*it)->getPrecision() ) << std::stof( (*it)->toString() );
+		} else {
+			strs << std::setprecision( (*it)->getPrecision() ) << std::stod( (*it)->toString() );
+		}
+		std::cout << strs.str() << std::endl;
+	}
 	return 0;
 }
 
@@ -509,8 +566,38 @@ runtime_error(error_message) {}
 Cpu::UnknownInstructionException::UnknownInstructionException( const std::string& error_message ) :
 runtime_error(error_message) {}
 
-Cpu::UnknownTypeOrValueException::UnknownTypeOrValueException( const std::string& error_message ) :
+Cpu::UnknownTypeException::UnknownTypeException( const std::string& error_message ) :
 runtime_error(error_message) {}
 
 Cpu::InvalidValueException::InvalidValueException( const std::string& error_message ) :
 runtime_error(error_message) {}
+
+Cpu::AssertFailedException::AssertFailedException( void ) throw() {}
+Cpu::AssertFailedException::~AssertFailedException( void ) throw() {}
+const char * Cpu::AssertFailedException::what( void ) const throw() {
+	return "Exception : assertion is not true.";
+}
+
+Cpu::PopEmptyStackException::PopEmptyStackException( void ) throw() {}
+Cpu::PopEmptyStackException::~PopEmptyStackException( void ) throw() {}
+const char * Cpu::PopEmptyStackException::what( void ) const throw() {
+	return "Exception : can't pop empty stack.";
+}
+
+Cpu::NotEnoughElementsInStackException::NotEnoughElementsInStackException( void ) throw() {}
+Cpu::NotEnoughElementsInStackException::~NotEnoughElementsInStackException( void ) throw() {}
+const char * Cpu::NotEnoughElementsInStackException::what( void ) const throw() {
+	return "Exception : not enough elements in stack.";
+}
+
+Cpu::OperationOverflowException::OperationOverflowException( void ) throw() {}
+Cpu::OperationOverflowException::~OperationOverflowException( void ) throw() {}
+const char * Cpu::OperationOverflowException::what( void ) const throw() {
+	return "Exception : operation overflow.";
+}
+
+Cpu::OperationUnderflowException::OperationUnderflowException( void ) throw() {}
+Cpu::OperationUnderflowException::~OperationUnderflowException( void ) throw() {}
+const char * Cpu::OperationUnderflowException::what( void ) const throw() {
+	return "Exception : operation underflow.";
+}

@@ -108,15 +108,55 @@ public:
 	};
 
 	/* UNKNOWN TYPE OR VALUE EXCEPTION =========================================*/
-	class UnknownTypeOrValueException : public std::runtime_error {
+	class UnknownTypeException : public std::runtime_error {
 	public:
-		UnknownTypeOrValueException(const std::string& error_message);
+		UnknownTypeException(const std::string& error_message);
 	};
 
 	/* INVALID VALUE EXCEPTION =================================================*/
 	class InvalidValueException : public std::runtime_error {
 	public:
 		InvalidValueException(const std::string& error_message);
+	};
+
+	/* ASSERT FAILED EXCEPTION =================================================*/
+	class AssertFailedException : public std::exception {
+	public:
+		AssertFailedException( void ) throw();
+		~AssertFailedException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
+	/* POP EMPTY STACK EXCEPTION ===============================================*/
+	class PopEmptyStackException : public std::exception {
+	public:
+		PopEmptyStackException( void ) throw();
+		~PopEmptyStackException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
+	/* NOT ENOUGHT ELEMENT IN STACK EXCEPTION ==================================*/
+	class NotEnoughElementsInStackException : public std::exception {
+	public:
+		NotEnoughElementsInStackException( void ) throw();
+		~NotEnoughElementsInStackException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
+	/* OPERATION OVERFLOW EXCEPTION ============================================*/
+	class OperationOverflowException : public std::exception {
+	public:
+		OperationOverflowException( void ) throw();
+		~OperationOverflowException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
+	/* OPERATION UNDERFLOW EXCEPTION ===========================================*/
+	class OperationUnderflowException : public std::exception {
+	public:
+		OperationUnderflowException( void ) throw();
+		~OperationUnderflowException( void ) throw();
+		virtual const char *what( void ) const throw();
 	};
 
 };

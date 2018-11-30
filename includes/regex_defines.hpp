@@ -15,7 +15,7 @@
 # define REG_COMMENT	"^;.*$"
 
 # define REG_INT			"^int(8|16|32)\\((\\-?[0-9]+)\\)$"
-# define REG_FLOAT		"^float\\((\\-?[0-9]+.[0-9])\\)$"
-# define REG_DOUBLE		"^double\\((\\-?[0-9]+.[0-9])\\)$"
+# define REG_FLOAT		"^float\\((\\-?[0-9]+.[0-9]+)\\)$"
+# define REG_DOUBLE		"^double\\((\\-?[0-9]+.[0-9]+)\\)$"
 
 #endif
