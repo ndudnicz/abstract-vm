@@ -341,7 +341,7 @@ int		Cpu::_exec( void ) {
 		try {
 			switch ( this->_getInstruction( *it, &sm ) ) {
 				case EIPUSH:
-				std::cout << "exec: " << sm[1] << '\n';
+				std::cout << "exec: " << sm[1] << '\n'; // DEBUG
 				this->_push( sm[1] );
 				break;
 				case EIASSERT:
@@ -397,9 +397,9 @@ int Cpu::_push( std::string str ) {
 	std::regex	regDouble(REG_DOUBLE);
 
 	it = this->_stack.begin();
-	std::cout << "pushing: " << str << '\n';
+	std::cout << "pushing: " << str << '\n'; // DEBUG
 	if ( std::regex_match( str, typeSm, regInt ) == true ) {
-	std::cout << "pushing: " << typeSm[2] << '\n';
+	std::cout << "pushing: " << typeSm[2] << '\n'; // DEBUG
 
 		switch ( std::stoi( typeSm[1] ) ) {
 			/* INT8 ================================================================*/
@@ -425,7 +425,7 @@ int Cpu::_push( std::string str ) {
 	}
 	this->_stack.insert( it, o );
 
-	printf("stack: %d\n", this->_stack.size());
+	printf("stack: %d\n", this->_stack.size()); // DEBUG
 
 	// if ( sm->size() > 1 ) {
 	// 	switch ( std::stoi( (*sm)[1] ) ) {
