@@ -56,17 +56,18 @@ private:
 	int							_regValidInstruction(
 		int const line,
 		std::string const str,
-		std::smatch *sm
+		std::string *matchstr1,
+		std::string *matchstr2
 	);
 	int							_regValidSm(
 		int const line,
-		std::string sm1
+		std::string &sm1
 	) const;
 	int							_exec( void );
 
 	/* INSTRUCTIONS ============================================================*/
-	int		_push( std::smatch *sm );
-	int		_assert( std::smatch *sm );
+	int		_push( std::string str );
+	int		_assert( std::string str );
 	int		_pop( void );
 	int		_dump( void );
 	int		_add( void );

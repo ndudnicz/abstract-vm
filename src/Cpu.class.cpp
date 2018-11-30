@@ -35,30 +35,43 @@ eInstruction	Cpu::_getInstruction(
 	std::regex const	regComment(REG_COMMENT);
 
 	if ( std::regex_match( str, *sm, regPush ) == true ) {
+		std::cout << "push" << '\n'; // DEBUG
 		return EIPUSH;
 	} else if ( std::regex_match( str, *sm, regAssert ) == true ) {
+		std::cout << "assert" << '\n'; // DEBUG
 		return EIASSERT;
 	} else if ( std::regex_match( str, *sm, regPop ) == true ) {
+		std::cout << "pop" << '\n'; // DEBUG
 		return EIPOP;
 	} else if ( std::regex_match( str, *sm, regDump ) == true ) {
+		std::cout << "dump" << '\n'; // DEBUG
 		return EIDUMP;
 	} else if ( std::regex_match( str, *sm, regAdd ) == true ) {
+		std::cout << "add" << '\n'; // DEBUG
 		return EIADD;
 	} else if ( std::regex_match( str, *sm, regSub ) == true ) {
+		std::cout << "sub" << '\n'; // DEBUG
 		return EISUB;
 	} else if ( std::regex_match( str, *sm, regMul ) == true ) {
+		std::cout << "mul" << '\n'; // DEBUG
 		return EIMUL;
 	} else if ( std::regex_match( str, *sm, regDiv ) == true ) {
+		std::cout << "div" << '\n'; // DEBUG
 		return EIDIV;
 	} else if ( std::regex_match( str, *sm, regMod ) == true ) {
+		std::cout << "mod" << '\n'; // DEBUG
 		return EIMOD;
 	} else if ( std::regex_match( str, *sm, regPrint ) == true ) {
+		std::cout << "print" << '\n'; // DEBUG
 		return EIPRINT;
 	} else if ( std::regex_match( str, *sm, regExit ) == true ) {
+		std::cout << "exit" << '\n'; // DEBUG
 		return EIEXIT;
 	} else if ( std::regex_match( str, *sm, regComment ) == true ) {
+		std::cout << "comment" << '\n'; // DEBUG
 		return EICOMMENT;
 	} else {
+		std::cout << "invalid" << '\n'; // DEBUG
 		return EIINVALID;
 	}
 }
@@ -124,14 +137,14 @@ int		Cpu::_getFile( char const *const filename ) {
 int		Cpu::_validInput( void ) {
 	std::vector<std::string>::iterator	it = this->_input.begin();
 	int																	line = 1;
-	std::smatch													sm;
+	std::string													matchstr1("");
+	std::string													matchstr2("");
 
 	for (; it < this->_input.end(); it++, line++) {
 		try {
 			std::cout << "*it: "<< *it << '\n'; // DEBUG
-			if ( this->_regValidInstruction( line, *it, &sm ) == 0 ) {
-				std::cout << "sm[1]:"<< sm[1].str() << '\n'; // DEBUG
-				static_cast<void>(this->_regValidSm( line, sm[1].str() ));
+			if ( this->_regValidInstruction( line, *it, &matchstr1, &matchstr2 ) == 0 ) {
+				static_cast<void>(this->_regValidSm( line, matchstr2 ));
 			}
 		} catch (...) {
 			throw ;
@@ -143,17 +156,18 @@ int		Cpu::_validInput( void ) {
 int		Cpu::_regValidInstruction(
 	int const line,
 	std::string const str,
-	std::smatch *sm
+	std::string *matchstr1,
+	std::string *matchstr2
 ) {
-	eInstruction const i = this->_getInstruction( str, sm );
+	std::smatch smlocal;
+	eInstruction const i = this->_getInstruction( str, &smlocal );
+	*matchstr1 = smlocal[0];
+	*matchstr2 = smlocal[1];
 
-	if ( i <= EIASSERT && sm->size() == 2 ) {
-		std::cout << "reg found : push or assert" << '\n'; // DEBUG
+	if ( i <= EIASSERT ) {
 		return 0;
-	} else if ( i <= EICOMMENT && sm->size() == 1 ) {
+	} else if ( i <= EICOMMENT ) {
 		std::cout << "reg found : other" << '\n'; // DEBUG
-		std::smatch ret;
-		*sm = ret;
 		return 1;
 	} else {
 		std::ostringstream	strs;
@@ -166,12 +180,14 @@ int		Cpu::_regValidInstruction(
 
 int		Cpu::_regValidSm(
 	int const line,
-	std::string sm1
+	std::string &sm1
 ) const {
 	std::regex	regInt(REG_INT);
 	std::regex	regFloat(REG_FLOAT);
 	std::regex	regDouble(REG_DOUBLE);
 	std::smatch	typeSm;
+
+	std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
 
 	/* INT ===================================================================*/
 	if ( std::regex_match( sm1, typeSm, regInt ) == true ) {
@@ -325,10 +341,11 @@ int		Cpu::_exec( void ) {
 		try {
 			switch ( this->_getInstruction( *it, &sm ) ) {
 				case EIPUSH:
-				this->_push( &sm );
+				std::cout << "exec: " << sm[1] << '\n';
+				this->_push( sm[1] );
 				break;
 				case EIASSERT:
-				this->_assert( &sm );
+				this->_assert( sm[1] );
 				break;
 				case EIPOP:
 				this->_pop();
@@ -370,35 +387,67 @@ int		Cpu::_exec( void ) {
 	return 0;
 }
 
-int Cpu::_push( std::smatch *sm ) {
+#include <stdio.h> // DEBUG
+int Cpu::_push( std::string str ) {
 	std::vector<IOperand*>::iterator	it;
 	IOperand													*o;
+	std::smatch												typeSm;
+	std::regex	regInt(REG_INT);
+	std::regex	regFloat(REG_FLOAT);
+	std::regex	regDouble(REG_DOUBLE);
 
 	it = this->_stack.begin();
-	if ( sm->size() > 1 ) {
-		switch ( std::stoi( (*sm)[1] ) ) {
-			case INT8:
-			o = new Operand<int8_t>( (*sm)[2], INT8 );
+	std::cout << "pushing: " << str << '\n';
+	if ( std::regex_match( str, typeSm, regInt ) == true ) {
+	std::cout << "pushing: " << typeSm[2] << '\n';
+
+		switch ( std::stoi( typeSm[1] ) ) {
+			/* INT8 ================================================================*/
+			case 8:
+			o = new Operand<int8_t>( typeSm[2], INT8 );
 			break;
-			case INT16:
-			o = new Operand<int16_t>( (*sm)[2], INT16 );
+			/* INT16 ===============================================================*/
+			case 16:
+			o = new Operand<int16_t>( typeSm[2], INT16 );
 			break;
-			case INT32:
-			o = new Operand<int32_t>( (*sm)[2], INT32 );
+			/* INT32 ===============================================================*/
+			case 32:
+			o = new Operand<int32_t>( typeSm[2], INT32 );
 			break;
 		}
+
+		/* FLOAT ===================================================================*/
+	} else if ( std::regex_match( str, typeSm, regFloat ) == true ) {
+		o = new Operand<float>( typeSm[1], FLOAT );
+		/* DOUBLE ==================================================================*/
 	} else {
-		if ( !(std::string( "float" )).compare( (*sm)[0] ) ) {
-			o = new Operand<float>( (*sm)[2], FLOAT );
-		} else {
-			o = new Operand<double>( (*sm)[2], DOUBLE );
-		}
+		o = new Operand<double>( typeSm[1], DOUBLE );
 	}
 	this->_stack.insert( it, o );
+
+	printf("stack: %d\n", this->_stack.size());
+
+	// if ( sm->size() > 1 ) {
+	// 	switch ( std::stoi( (*sm)[1] ) ) {
+	// 		case INT8:
+	// 		case INT16:
+	// 		o = new Operand<int16_t>( (*sm)[2], INT16 );
+	// 		break;
+	// 		case INT32:
+	// 		o = new Operand<int32_t>( (*sm)[2], INT32 );
+	// 		break;
+	// 	}
+	// } else {
+	// 	if ( !(std::string( "float" )).compare( (*sm)[0] ) ) {
+	// 		o = new Operand<float>( (*sm)[2], FLOAT );
+	// 	} else {
+	// 		o = new Operand<double>( (*sm)[2], DOUBLE );
+	// 	}
+	// }
 	return 0;
 }
 
-int Cpu::_assert( std::smatch *sm ) {
+int Cpu::_assert( std::string str ) {
 	return 0;
 }
 
