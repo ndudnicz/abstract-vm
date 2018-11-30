@@ -109,6 +109,8 @@ int		Cpu::run( int ac, char const **av ) {
 		std::cout << e.what() << std::endl;
 	} catch (Cpu::PrintWrongTypeException &e) {
 		std::cout << e.what() << std::endl;
+	} catch (Cpu::FloatingPointException &e) {
+		std::cout << e.what() << std::endl;
 	}
 	return 0;
 }
@@ -487,12 +489,33 @@ int Cpu::_div( void ) {
 
 int Cpu::_mod( void ) {
 	if ( this->_stack.size() > 1 ) {
-		return 0;
+		std::vector<IOperand*>::iterator	it = this->_stack.begin();
+		if ( std::stod( (*it)->toString() ) != static_cast<double>(0) ) {
+			// TODO OP HERE
+			return 0;
+		} else {
+			throw Cpu::FloatingPointException();
+		}
 	} else {
 		throw Cpu::NotEnoughElementsInStackException();
 	}
 }
+
 int Cpu::_mul( void ) {
+	if ( this->_stack.size() > 1 ) {
+		std::vector<IOperand*>::iterator	it = this->_stack.begin();
+		if ( std::stod( (*it)->toString() ) != static_cast<double>(0) ) {
+			// TODO OP HERE
+			return 0;
+		} else {
+			throw Cpu::FloatingPointException();
+		}
+	} else {
+		throw Cpu::NotEnoughElementsInStackException();
+	}
+}
+
+int Cpu::_sub( void ) {
 	if ( this->_stack.size() > 1 ) {
 		return 0;
 	} else {
@@ -509,13 +532,6 @@ int Cpu::_pop( void ) {
 	}
 }
 
-int Cpu::_sub( void ) {
-	if ( this->_stack.size() > 1 ) {
-		return 0;
-	} else {
-		throw Cpu::NotEnoughElementsInStackException();
-	}
-}
 
 int Cpu::_dump( void ) {
 	std::vector<IOperand*>::iterator	it = this->_stack.begin();
@@ -614,4 +630,10 @@ Cpu::PrintWrongTypeException::PrintWrongTypeException( void ) throw() {}
 Cpu::PrintWrongTypeException::~PrintWrongTypeException( void ) throw() {}
 const char * Cpu::PrintWrongTypeException::what( void ) const throw() {
 	return "Exception : trying to print wrong type (must be int8).";
+}
+
+Cpu::FloatingPointException::FloatingPointException( void ) throw() {}
+Cpu::FloatingPointException::~FloatingPointException( void ) throw() {}
+const char * Cpu::FloatingPointException::what( void ) const throw() {
+	return "Exception : Floating point exception.";
 }

@@ -35,16 +35,6 @@ public:
 	eOperandType			getType( void ) const;
 	std::string const	&toString( void ) const;
 
-	/* DIVISION BY 0 EXCEPTION ===================================================*/
-	class FloatingPoint : public std::exception {
-
-	public:
-		FloatingPoint( void ) throw();
-		~FloatingPoint( void ) throw();
-		virtual const char *what( void ) const throw();
-
-	};
-
 };
 
 #endif

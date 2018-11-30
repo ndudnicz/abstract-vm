@@ -167,6 +167,14 @@ public:
 		virtual const char *what( void ) const throw();
 	};
 
+	/* DIVISION BY 0 EXCEPTION ===================================================*/
+	class FloatingPointException : public std::exception {
+	public:
+		FloatingPointException( void ) throw();
+		~FloatingPointException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
 };
 
 #endif

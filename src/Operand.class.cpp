@@ -66,33 +66,24 @@ Operand<T>::operator*( IOperand const & rhs ) const {
 
 template <class T> IOperand const*
 Operand<T>::operator/( IOperand const & rhs ) const {
-	if ( std::stod( rhs.toString() ) == 0 ) {
-		throw Operand<T>::FloatingPoint();
-	} else {
-		double							result = std::stod( this->toString() ) / std::stod( rhs.toString() );
-		eOperandType const	type = MAX( this->getType(), rhs.getType() );
-		std::ostringstream	strs;
-		result = type > INT32 ? result : floor( result );
+	double							result = std::stod( this->toString() ) / std::stod( rhs.toString() );
+	eOperandType const	type = MAX( this->getType(), rhs.getType() );
+	std::ostringstream	strs;
+	result = type > INT32 ? result : floor( result );
 
-		strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-		return new Operand( strs.str(), type );
-	}
+	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
+	return new Operand( strs.str(), type );
 }
 
 template <class T> IOperand const*
 Operand<T>::operator%( IOperand const & rhs ) const {
-	if ( std::stod( rhs.toString() ) == 0 ) {
-		throw Operand<T>::FloatingPoint();
-	} else {
-		double							result = std::fmod( std::stod( this->toString() ), std::stod( rhs.toString() ) );
-		eOperandType const	type = MAX( this->getType(), rhs.getType() );
-		std::ostringstream	strs;
-		result = type > INT32 ? result : floor( result );
+	double							result = std::fmod( std::stod( this->toString() ), std::stod( rhs.toString() ) );
+	eOperandType const	type = MAX( this->getType(), rhs.getType() );
+	std::ostringstream	strs;
+	result = type > INT32 ? result : floor( result );
 
-		strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-		return new Operand( strs.str(), type );
-	}
-	// return NULL;
+	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
+	return new Operand( strs.str(), type );
 }
 
 
@@ -125,16 +116,6 @@ Operand<T>::toString( void ) const {
 
 
 /* OPERATOR ==================================================================*/
-
-/* EXCEPTIONS ================================================================*/
-template <class T>
-Operand<T>::FloatingPoint::FloatingPoint( void ) throw() {}
-template <class T>
-Operand<T>::FloatingPoint::~FloatingPoint( void ) throw() {}
-template <class T>
-const char * Operand<T>::FloatingPoint::what( void ) const throw() {
-	return "Exception : Floating point exception.";
-}
 
 /* TEMPLATES =================================================================*/
 
