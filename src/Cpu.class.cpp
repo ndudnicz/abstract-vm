@@ -481,7 +481,23 @@ int Cpu::_add( void ) {
 
 int Cpu::_div( void ) {
 	if ( this->_stack.size() > 1 ) {
-		return 0;
+		std::vector<IOperand*>::iterator	it = this->_stack.begin();
+		IOperand													*v1 = *it;
+		IOperand													*v2 = *(it + 1);
+
+		if ( std::stod( (*it)->toString() ) != static_cast<double>(0) ) {
+			// TODO OP HERE
+			IOperand const * const result = *v2 / *v1;
+			// this->_stack.erase( this->_stack.begin() );
+			// this->_stack.erase( this->_stack.begin() );
+			// it = this->_stack.begin();
+			std::cout << result->toString() << '\n';
+			std::cout << result->getType() << '\n';
+			// this->_stack.push_back( result );
+			return 0;
+		} else {
+			throw Cpu::FloatingPointException();
+		}
 	} else {
 		throw Cpu::NotEnoughElementsInStackException();
 	}

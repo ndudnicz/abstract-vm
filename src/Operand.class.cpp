@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include "OperandFactory.class.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
 int const	IOperand::precisions[5] = {0, 0, 0, 7, 16};
@@ -39,7 +40,7 @@ Operand<T>::operator+( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand( strs.str(), type );
+	return new Operand<T>( strs.str(), type );
 }
 
 template <class T> IOperand const*
@@ -50,7 +51,7 @@ Operand<T>::operator-( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand( strs.str(), type );
+	return new Operand<T>( strs.str(), type );
 }
 
 template <class T> IOperand const*
@@ -61,18 +62,19 @@ Operand<T>::operator*( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand( strs.str(), type );
+	return new Operand<T>( strs.str(), type );
 }
 
 template <class T> IOperand const*
 Operand<T>::operator/( IOperand const & rhs ) const {
 	double							result = std::stod( this->toString() ) / std::stod( rhs.toString() );
-	eOperandType const	type = MAX( this->getType(), rhs.getType() );
+	eOperandType	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand( strs.str(), type );
+	IOperand const *newop = OperandFactory::createop( strs.str(), type );
+	return newop;
 }
 
 template <class T> IOperand const*
@@ -83,7 +85,7 @@ Operand<T>::operator%( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand( strs.str(), type );
+	return new Operand<T>( strs.str(), type );
 }
 
 

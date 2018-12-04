@@ -24,6 +24,7 @@ Cpu.class.cpp \
 add_overflow.cpp \
 sub_overflow.cpp \
 mul_overflow.cpp \
+OperandFactory.class.cpp \
 
 # OBJECTS LIST ================================================================#
 
