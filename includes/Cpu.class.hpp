@@ -43,7 +43,7 @@ private:
 	Cpu &	operator=( Cpu const & rhs );
 
 	std::vector<std::string>	_input;
-	std::vector<IOperand*>		_stack;
+	std::vector<IOperand *>		_stack;
 
 	eInstruction		_getInstruction(
 		std::string const str,

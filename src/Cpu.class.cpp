@@ -487,13 +487,13 @@ int Cpu::_div( void ) {
 
 		if ( std::stod( (*it)->toString() ) != static_cast<double>(0) ) {
 			// TODO OP HERE
-			IOperand const * const result = *v2 / *v1;
-			// this->_stack.erase( this->_stack.begin() );
-			// this->_stack.erase( this->_stack.begin() );
-			// it = this->_stack.begin();
+			IOperand* result = const_cast<IOperand*>(*v2 / *v1);
+			this->_stack.erase( this->_stack.begin() );
+			this->_stack.erase( this->_stack.begin() );
+			it = this->_stack.begin();
 			std::cout << result->toString() << '\n';
 			std::cout << result->getType() << '\n';
-			// this->_stack.push_back( result );
+			this->_stack.insert( it, result );
 			return 0;
 		} else {
 			throw Cpu::FloatingPointException();
