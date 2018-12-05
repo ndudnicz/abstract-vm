@@ -40,7 +40,7 @@ Operand<T>::operator+( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand<T>( strs.str(), type );
+	return OperandFactory::createop( strs.str(), type );
 }
 
 template <class T> IOperand const*
@@ -51,7 +51,7 @@ Operand<T>::operator-( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand<T>( strs.str(), type );
+	return OperandFactory::createop( strs.str(), type );
 }
 
 template <class T> IOperand const*
@@ -62,7 +62,7 @@ Operand<T>::operator*( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand<T>( strs.str(), type );
+	return OperandFactory::createop( strs.str(), type );;
 }
 
 template <class T> IOperand const*
@@ -73,8 +73,7 @@ Operand<T>::operator/( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	IOperand const *newop = OperandFactory::createop( strs.str(), type );
-	return newop;
+	return OperandFactory::createop( strs.str(), type );;
 }
 
 template <class T> IOperand const*
@@ -85,7 +84,7 @@ Operand<T>::operator%( IOperand const & rhs ) const {
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
-	return new Operand<T>( strs.str(), type );
+	return OperandFactory::createop( strs.str(), type );
 }
 
 

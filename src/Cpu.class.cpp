@@ -4,6 +4,7 @@
 #include <limits>
 #include "Operand.class.hpp"
 #include <iomanip>
+#include "OperandFactory.class.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
 
@@ -420,24 +421,24 @@ int Cpu::_push( std::string str ) {
 		switch ( std::stoi( typeSm[1] ) ) {
 			/* INT8 ================================================================*/
 			case 8:
-			o = new Operand<int8_t>( typeSm[2], INT8 );
+			o = const_cast<IOperand*>(OperandFactory::createop( typeSm[2], INT8 ));
 			break;
 			/* INT16 ===============================================================*/
 			case 16:
-			o = new Operand<int16_t>( typeSm[2], INT16 );
+			o = const_cast<IOperand*>(OperandFactory::createop( typeSm[2], INT16 ));
 			break;
 			/* INT32 ===============================================================*/
 			case 32:
-			o = new Operand<int32_t>( typeSm[2], INT32 );
+			o = const_cast<IOperand*>(OperandFactory::createop( typeSm[2], INT32 ));
 			break;
 		}
 
 		/* FLOAT =================================================================*/
 	} else if ( std::regex_match( str, typeSm, regFloat ) == true ) {
-		o = new Operand<float>( typeSm[1], FLOAT );
+		o = const_cast<IOperand*>(OperandFactory::createop( typeSm[1], FLOAT ));
 		/* DOUBLE ================================================================*/
 	} else if ( std::regex_match( str, typeSm, regDouble ) == true ) {
-		o = new Operand<double>( typeSm[1], DOUBLE );
+		o = const_cast<IOperand*>(OperandFactory::createop( typeSm[1], DOUBLE ));
 	}
 	this->_stack.insert( it, o );
 	return 0;
@@ -473,6 +474,19 @@ int Cpu::_assert( std::string str ) {
 
 int Cpu::_add( void ) {
 	if ( this->_stack.size() > 1 ) {
+		std::vector<IOperand*>::iterator	it = this->_stack.begin();
+		IOperand													*v1 = *it;
+		IOperand													*v2 = *(it + 1);
+
+		IOperand* result = const_cast<IOperand*>(*v2 + *v1);
+		this->_stack.erase( this->_stack.begin() );
+		this->_stack.erase( this->_stack.begin() );
+		delete v1;
+		delete v2;
+		it = this->_stack.begin();
+		// std::cout << result->toString() << '\n'; // DEBUG
+		// std::cout << result->getType() << '\n'; // DEBUG
+		this->_stack.insert( it, result );
 		return 0;
 	} else {
 		throw Cpu::NotEnoughElementsInStackException();
@@ -485,14 +499,17 @@ int Cpu::_div( void ) {
 		IOperand													*v1 = *it;
 		IOperand													*v2 = *(it + 1);
 
+		// std::cout << "div: " << v2->toString() << "/" << v1->toString() << '\n'; // DEBUG
 		if ( std::stod( (*it)->toString() ) != static_cast<double>(0) ) {
 			// TODO OP HERE
 			IOperand* result = const_cast<IOperand*>(*v2 / *v1);
 			this->_stack.erase( this->_stack.begin() );
 			this->_stack.erase( this->_stack.begin() );
+			delete v1;
+			delete v2;
 			it = this->_stack.begin();
-			std::cout << result->toString() << '\n';
-			std::cout << result->getType() << '\n';
+			// std::cout << result->toString() << '\n'; // DEBUG
+			// std::cout << result->getType() << '\n'; // DEBUG
 			this->_stack.insert( it, result );
 			return 0;
 		} else {
@@ -506,8 +523,23 @@ int Cpu::_div( void ) {
 int Cpu::_mod( void ) {
 	if ( this->_stack.size() > 1 ) {
 		std::vector<IOperand*>::iterator	it = this->_stack.begin();
+		IOperand													*v1 = *it;
+		IOperand													*v2 = *(it + 1);
+		// std::cout << "div: " << v2->toString() << "%" << v1->toString() << '\n'; // DEBUG
+
 		if ( std::stod( (*it)->toString() ) != static_cast<double>(0) ) {
-			// TODO OP HERE
+			std::vector<IOperand*>::iterator	it = this->_stack.begin();
+
+			IOperand* result = const_cast<IOperand*>(*v2 % *v1);
+			this->_stack.erase( this->_stack.begin() );
+			this->_stack.erase( this->_stack.begin() );
+			delete v1;
+			delete v2;
+			it = this->_stack.begin();
+			// std::cout << result->toString() << '\n'; // DEBUG
+			// std::cout << result->getType() << '\n'; // DEBUG
+			this->_stack.insert( it, result );
+			return 0;
 			return 0;
 		} else {
 			throw Cpu::FloatingPointException();
@@ -520,12 +552,19 @@ int Cpu::_mod( void ) {
 int Cpu::_mul( void ) {
 	if ( this->_stack.size() > 1 ) {
 		std::vector<IOperand*>::iterator	it = this->_stack.begin();
-		if ( std::stod( (*it)->toString() ) != static_cast<double>(0) ) {
-			// TODO OP HERE
-			return 0;
-		} else {
-			throw Cpu::FloatingPointException();
-		}
+		IOperand													*v1 = *it;
+		IOperand													*v2 = *(it + 1);
+
+		IOperand* result = const_cast<IOperand*>(*v2 * *v1);
+		this->_stack.erase( this->_stack.begin() );
+		this->_stack.erase( this->_stack.begin() );
+		delete v1;
+		delete v2;
+		it = this->_stack.begin();
+		// std::cout << result->toString() << '\n'; // DEBUG
+		// std::cout << result->getType() << '\n'; // DEBUG
+		this->_stack.insert( it, result );
+		return 0;
 	} else {
 		throw Cpu::NotEnoughElementsInStackException();
 	}
@@ -533,6 +572,19 @@ int Cpu::_mul( void ) {
 
 int Cpu::_sub( void ) {
 	if ( this->_stack.size() > 1 ) {
+		std::vector<IOperand*>::iterator	it = this->_stack.begin();
+		IOperand													*v1 = *it;
+		IOperand													*v2 = *(it + 1);
+
+		IOperand* result = const_cast<IOperand*>(*v2 - *v1);
+		this->_stack.erase( this->_stack.begin() );
+		this->_stack.erase( this->_stack.begin() );
+		delete v1;
+		delete v2;
+		it = this->_stack.begin();
+		// std::cout << result->toString() << '\n'; // DEBUG
+		// std::cout << result->getType() << '\n'; // DEBUG
+		this->_stack.insert( it, result );
 		return 0;
 	} else {
 		throw Cpu::NotEnoughElementsInStackException();
@@ -597,7 +649,7 @@ void Cpu::_printInput( void ) { // DEBUG
 Cpu::DidntGetEndOfInputException::DidntGetEndOfInputException( void ) throw() {}
 Cpu::DidntGetEndOfInputException::~DidntGetEndOfInputException( void ) throw() {}
 const char * Cpu::DidntGetEndOfInputException::what( void ) const throw() {
-	return CONCAT("Exception : Didn't get end of input : ", END_OF_INPUT);
+	return CONCAT("Error : Didn't get end of input : ", END_OF_INPUT);
 }
 
 Cpu::CantOpenFileException::CantOpenFileException( const std::string& error_message ) :
@@ -615,41 +667,41 @@ runtime_error(error_message) {}
 Cpu::AssertFailedException::AssertFailedException( void ) throw() {}
 Cpu::AssertFailedException::~AssertFailedException( void ) throw() {}
 const char * Cpu::AssertFailedException::what( void ) const throw() {
-	return "Exception : assertion is not true.";
+	return "Error : assertion is not true.";
 }
 
 Cpu::PopEmptyStackException::PopEmptyStackException( void ) throw() {}
 Cpu::PopEmptyStackException::~PopEmptyStackException( void ) throw() {}
 const char * Cpu::PopEmptyStackException::what( void ) const throw() {
-	return "Exception : can't pop empty stack.";
+	return "Error : can't pop empty stack.";
 }
 
 Cpu::NotEnoughElementsInStackException::NotEnoughElementsInStackException( void ) throw() {}
 Cpu::NotEnoughElementsInStackException::~NotEnoughElementsInStackException( void ) throw() {}
 const char * Cpu::NotEnoughElementsInStackException::what( void ) const throw() {
-	return "Exception : not enough elements in stack.";
+	return "Error : not enough elements in stack.";
 }
 
 Cpu::OperationOverflowException::OperationOverflowException( void ) throw() {}
 Cpu::OperationOverflowException::~OperationOverflowException( void ) throw() {}
 const char * Cpu::OperationOverflowException::what( void ) const throw() {
-	return "Exception : operation overflow.";
+	return "Error : operation overflow.";
 }
 
 Cpu::OperationUnderflowException::OperationUnderflowException( void ) throw() {}
 Cpu::OperationUnderflowException::~OperationUnderflowException( void ) throw() {}
 const char * Cpu::OperationUnderflowException::what( void ) const throw() {
-	return "Exception : operation underflow.";
+	return "Error : operation underflow.";
 }
 
 Cpu::PrintWrongTypeException::PrintWrongTypeException( void ) throw() {}
 Cpu::PrintWrongTypeException::~PrintWrongTypeException( void ) throw() {}
 const char * Cpu::PrintWrongTypeException::what( void ) const throw() {
-	return "Exception : trying to print wrong type (must be int8).";
+	return "Error : trying to print wrong type (must be int8).";
 }
 
 Cpu::FloatingPointException::FloatingPointException( void ) throw() {}
 Cpu::FloatingPointException::~FloatingPointException( void ) throw() {}
 const char * Cpu::FloatingPointException::what( void ) const throw() {
-	return "Exception : Floating point exception.";
+	return "Error : Floating point exception.";
 }
