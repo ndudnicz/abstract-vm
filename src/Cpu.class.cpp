@@ -21,9 +21,10 @@ Cpu::~Cpu( void ) {}
 /* MEMBER FUNCTIONS ==========================================================*/
 eInstruction	Cpu::_getInstruction(
 	std::string const str,
-	std::smatch *sm
+	std::smatch *sm,
+	std::string **s
 ) {
-	std::regex const	regPush(REG_PUSH);
+	std::regex 	regPush(REG_PUSH);
 	std::regex const	regPop(REG_POP);
 	std::regex const	regDump(REG_DUMP);
 	std::regex const	regAssert(REG_ASSERT);
@@ -37,6 +38,8 @@ eInstruction	Cpu::_getInstruction(
 	std::regex const	regComment(REG_COMMENT);
 
 	if ( std::regex_match( str, *sm, regPush ) == true ) {
+		std::cout << "ddd: "<< (*sm)[1] << '\n';
+		*s = new std::string( (*sm)[1] );
 		std::cout << "push" << '\n'; // DEBUG
 		return EIPUSH;
 	} else if ( std::regex_match( str, *sm, regAssert ) == true ) {
@@ -112,6 +115,10 @@ int		Cpu::run( int ac, char const **av ) {
 		std::cout << e.what() << std::endl;
 	} catch (Cpu::FloatingPointException &e) {
 		std::cout << e.what() << std::endl;
+	} catch (Cpu::OverflowException &e) {
+		std::cout << e.what() << std::endl;
+	} catch (Cpu::UnderflowException &e) {
+		std::cout << e.what() << std::endl;
 	}
 	return 0;
 }
@@ -153,15 +160,17 @@ int		Cpu::_getFile( char const *const filename ) {
 int		Cpu::_validInput( void ) {
 	std::vector<std::string>::iterator	it = this->_input.begin();
 	int																	line = 1;
-	std::string													matchstr1("");
-	std::string													matchstr2("");
+	std::string													*matchstr2 = NULL;
 
 	for (; it < this->_input.end(); it++, line++) {
 		if ( (*it).length() > 0 ) {
 			try {
 				std::cout << "*it: "<< *it << '\n'; // DEBUG
-				if ( this->_regValidInstruction( line, *it, &matchstr1, &matchstr2 ) == 0 ) {
-					static_cast<void>(this->_regValidSm( line, matchstr2 ));
+				if ( this->_regValidInstruction( line, *it, &matchstr2 ) == 0 ) {
+					static_cast<void>(this->_regValidSm( line, *matchstr2 ));
+					if ( matchstr2 ) {
+						delete matchstr2;
+					}
 				}
 			} catch (...) {
 				throw ;
@@ -170,17 +179,14 @@ int		Cpu::_validInput( void ) {
 	}
 	return 0;
 }
-
 int		Cpu::_regValidInstruction(
 	int const line,
 	std::string const str,
-	std::string *matchstr1,
-	std::string *matchstr2
+	std::string **matchstr2
 ) {
 	std::smatch smlocal;
-	eInstruction const i = this->_getInstruction( str, &smlocal );
-	*matchstr1 = smlocal[0];
-	*matchstr2 = smlocal[1];
+	eInstruction const i = this->_getInstruction( str, &smlocal, matchstr2 );
+	std::cout << "matchstr2: " << **matchstr2 << '\n';
 
 	if ( i <= EIASSERT ) {
 		return 0;
@@ -205,7 +211,7 @@ int		Cpu::_regValidSm(
 	std::regex	regDouble(REG_DOUBLE);
 	std::smatch	typeSm;
 
-	// std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
+	std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
 
 	/* INT ===================================================================*/
 	if ( std::regex_match( sm1, typeSm, regInt ) == true ) {
@@ -300,7 +306,7 @@ int		Cpu::_regValidSm(
 
 		try {
 			float const value = std::stof( typeSm[1] );
-			if ( value == 0 || typeSm[1].length() <= ( IOperand::precisions[ FLOAT ] + 2 ) ) {
+			if ( value == 0 || typeSm[1].length() /*<= ( IOperand::precisions[ FLOAT ] + 2 ) */) {
 				return 0;
 			} else {
 				std::ostringstream	strs;
@@ -323,7 +329,7 @@ int		Cpu::_regValidSm(
 
 		try {
 			double const value = std::stod( typeSm[1] );
-			if ( value == 0 || typeSm[1].length() <= ( IOperand::precisions[ DOUBLE ] + 2 ) ) {
+			if ( value == 0 || typeSm[1].length() /*<= ( IOperand::precisions[ DOUBLE ] + 2 ) */) {
 				return 0;
 			} else {
 				std::ostringstream	strs;
@@ -338,11 +344,13 @@ int		Cpu::_regValidSm(
 			strs << line;
 			std::string					str1( EXCEP_INVALID_VALUE );
 			std::string					str2( strs.str() );
+				std::cout << "yo" << '\n';
 			throw Cpu::InvalidValueException( str1 + str2 );
 		}
 
 	} else {
-		// std::cout << "heeeeere" << '\n'; // DEBUG
+		std::cout << "heeeeere" << '\n'; // DEBUG
+		std::cout << typeSm[0] << '\n';
 		std::ostringstream	strs;
 		strs << line;
 		std::string					str1( EXCEP_UNKNOWN_TYPE );
@@ -356,17 +364,18 @@ int		Cpu::_exec( void ) {
 	std::vector<std::string>::iterator	it = this->_input.begin();
 	std::smatch													sm;
 	IOperand														*o;
+	std::string													*s = NULL;
 
 	for (; it < this->_input.end(); it++) {
 		if ( (*it).length() > 0 ) {
 			try {
-				switch ( this->_getInstruction( *it, &sm ) ) {
+				switch ( this->_getInstruction( *it, &sm, &s ) ) {
 					case EIPUSH:
-					// std::cout << "exec: " << sm[1] << '\n'; // DEBUG
-					this->_push( sm[1] );
+					std::cout << "exec: " << *s << '\n'; // DEBUG
+					this->_push( *s );
 					break;
 					case EIASSERT:
-					this->_assert( sm[1] );
+					this->_assert( *s );
 					break;
 					case EIPOP:
 					this->_pop();
@@ -404,10 +413,15 @@ int		Cpu::_exec( void ) {
 			}
 		}
 	}
+	if ( s ) {
+		delete s;
+	}
 	return 0;
 }
 
-int Cpu::_push( std::string str ) {
+	/* INSTRUCTIONS ============================================================*/
+
+int	Cpu::_push( std::string str ) {
 	std::vector<IOperand*>::iterator	it;
 	IOperand													*o;
 	std::smatch												typeSm;
@@ -444,7 +458,7 @@ int Cpu::_push( std::string str ) {
 	return 0;
 }
 
-int Cpu::_assert( std::string str ) {
+int	Cpu::_assert( std::string str ) {
 	std::vector<IOperand*>::iterator	it;
 	std::smatch												typeSm;
 	std::regex	regInt(REG_INT);
@@ -472,28 +486,37 @@ int Cpu::_assert( std::string str ) {
 	return 0;
 }
 
-int Cpu::_add( void ) {
+int	Cpu::_add( void ) {
 	if ( this->_stack.size() > 1 ) {
 		std::vector<IOperand*>::iterator	it = this->_stack.begin();
 		IOperand													*v1 = *it;
 		IOperand													*v2 = *(it + 1);
+		int 															overflow;
+		this->_add_overflow( v1, v2, MAX( v1->getType(), v2->getType() ), &overflow );
 
-		IOperand* result = const_cast<IOperand*>(*v2 + *v1);
-		this->_stack.erase( this->_stack.begin() );
-		this->_stack.erase( this->_stack.begin() );
-		delete v1;
-		delete v2;
-		it = this->_stack.begin();
-		// std::cout << result->toString() << '\n'; // DEBUG
-		// std::cout << result->getType() << '\n'; // DEBUG
-		this->_stack.insert( it, result );
-		return 0;
+		std::cout << overflow << '\n';
+		if ( overflow > 0 ) {
+			throw Cpu::OverflowException();
+		} else if ( overflow < 0 ) {
+			throw Cpu::UnderflowException();
+		} else {
+			IOperand* result = const_cast<IOperand*>(*v2 + *v1);
+			this->_stack.erase( this->_stack.begin() );
+			this->_stack.erase( this->_stack.begin() );
+			delete v1;
+			delete v2;
+			it = this->_stack.begin();
+			// std::cout << "tosting: "<< result->toString() << '\n'; // DEBUG
+			// std::cout << "type: "<<result->getType() << '\n'; // DEBUG
+			this->_stack.insert( it, result );
+			return 0;
+		}
 	} else {
 		throw Cpu::NotEnoughElementsInStackException();
 	}
 }
 
-int Cpu::_div( void ) {
+int	Cpu::_div( void ) {
 	if ( this->_stack.size() > 1 ) {
 		std::vector<IOperand*>::iterator	it = this->_stack.begin();
 		IOperand													*v1 = *it;
@@ -520,7 +543,7 @@ int Cpu::_div( void ) {
 	}
 }
 
-int Cpu::_mod( void ) {
+int	Cpu::_mod( void ) {
 	if ( this->_stack.size() > 1 ) {
 		std::vector<IOperand*>::iterator	it = this->_stack.begin();
 		IOperand													*v1 = *it;
@@ -549,7 +572,7 @@ int Cpu::_mod( void ) {
 	}
 }
 
-int Cpu::_mul( void ) {
+int	Cpu::_mul( void ) {
 	if ( this->_stack.size() > 1 ) {
 		std::vector<IOperand*>::iterator	it = this->_stack.begin();
 		IOperand													*v1 = *it;
@@ -570,28 +593,37 @@ int Cpu::_mul( void ) {
 	}
 }
 
-int Cpu::_sub( void ) {
+int	Cpu::_sub( void ) {
 	if ( this->_stack.size() > 1 ) {
 		std::vector<IOperand*>::iterator	it = this->_stack.begin();
 		IOperand													*v1 = *it;
 		IOperand													*v2 = *(it + 1);
+		int 															overflow;
+		this->_sub_overflow( v1, v2, MAX( v1->getType(), v2->getType() ), &overflow );
 
-		IOperand* result = const_cast<IOperand*>(*v2 - *v1);
-		this->_stack.erase( this->_stack.begin() );
-		this->_stack.erase( this->_stack.begin() );
-		delete v1;
-		delete v2;
-		it = this->_stack.begin();
-		// std::cout << result->toString() << '\n'; // DEBUG
-		// std::cout << result->getType() << '\n'; // DEBUG
-		this->_stack.insert( it, result );
-		return 0;
+		std::cout << overflow << '\n';
+		if ( overflow > 0 ) {
+			throw Cpu::OverflowException();
+		} else if ( overflow < 0 ) {
+			throw Cpu::UnderflowException();
+		} else {
+			IOperand* result = const_cast<IOperand*>(*v2 - *v1);
+			this->_stack.erase( this->_stack.begin() );
+			this->_stack.erase( this->_stack.begin() );
+			delete v1;
+			delete v2;
+			it = this->_stack.begin();
+			// std::cout << result->toString() << '\n'; // DEBUG
+			// std::cout << result->getType() << '\n'; // DEBUG
+			this->_stack.insert( it, result );
+			return 0;
+		}
 	} else {
 		throw Cpu::NotEnoughElementsInStackException();
 	}
 }
 
-int Cpu::_pop( void ) {
+int	Cpu::_pop( void ) {
 	if ( this->_stack.size() > 0 ) {
 		this->_stack.erase(this->_stack.begin());
 		return 0;
@@ -601,9 +633,9 @@ int Cpu::_pop( void ) {
 }
 
 
-int Cpu::_dump( void ) {
+int	Cpu::_dump( void ) {
 	std::vector<IOperand*>::iterator	it = this->_stack.begin();
-
+// std::cout << "coucou" << '\n';
 	for (; it != this->_stack.end(); it++) {
 		std::ostringstream	strs;
 		if ( (*it)->getType() < FLOAT ) {
@@ -618,7 +650,7 @@ int Cpu::_dump( void ) {
 	return 0;
 }
 
-int Cpu::_print( void ) {
+int	Cpu::_print( void ) {
 	if ( this->_stack.size() > 0 ) {
 		std::vector<IOperand*>::iterator		it = this->_stack.begin();
 		if ( (*it)->getType() == INT8 ) {
@@ -629,6 +661,127 @@ int Cpu::_print( void ) {
 		}
 	}
 	return 0;
+}
+	/* OVERFLOW CHECK ==========================================================*/
+#include <stdio.h> // DEBUG
+int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const {
+	*overflow = 0;
+	if ( type < FLOAT ) {
+		int32_t	_v1 = std::stoi( v1->toString() );
+		int32_t	_v2 = std::stoi( v2->toString() );
+
+		switch ( type ) {
+			case INT8:
+			int8_t	r8;
+			*overflow = (__builtin_add_overflow( _v1, _v2, &r8 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v1, _v2, &r8 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v1, _v2, &r8 ) && (_v1 < 0 || _v2 < 0));
+			return 0;
+			case INT16:
+			int16_t	r16;
+			*overflow = (__builtin_add_overflow( _v1, _v2, &r16 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v1, _v2, &r16 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v1, _v2, &r16 ) && (_v1 < 0 || _v2 < 0));
+			return 0;
+			case INT32:
+			int32_t	r32;
+			*overflow = (__builtin_add_overflow( _v1, _v2, &r32 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v1, _v2, &r32 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v1, _v2, &r32 ) && (_v1 < 0 || _v2 < 0));
+			return 0;
+			default:
+			return 0;
+		}
+	} else if ( type < DOUBLE ) {
+		float	_v1 = std::stof( v1->toString() );
+		float	_v2 = std::stof( v2->toString() );
+		float	_floatMaxHalf = std::numeric_limits<float>::max() / 2.0f;
+		float	_floatMinHalf = std::numeric_limits<float>::min() / 2.0f;
+
+		*overflow = (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) ? (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) : -(_v1 < _floatMinHalf && _v2 < _floatMinHalf);
+		return 0;
+		// return (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) ||
+						;
+	} else {
+		double	_v1 = std::stod( v1->toString() );
+		double	_v2 = std::stod( v2->toString() );
+		double	_doubleMaxHalf = std::numeric_limits<double>::max() / 2.0f;
+		double	_doubleMinHalf = std::numeric_limits<double>::min() / 2.0f;
+
+		*overflow = (_v1 > _doubleMaxHalf && _v2 > _doubleMaxHalf) ? (_v1 > _doubleMaxHalf && _v2 > _doubleMaxHalf) : -(_v1 < _doubleMinHalf && _v2 < _doubleMinHalf);
+		return 0;
+	}
+}
+
+int	Cpu::_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const {
+	if ( type < FLOAT ) {
+		int32_t	_v1 = std::stoi( v1->toString() );
+		int32_t	_v2 = std::stoi( v2->toString() );
+
+		switch ( type ) {
+			case INT8:
+			int8_t	r8;
+			*overflow = (__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 > 0 || _v2 < 0)) ? (__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 > 0 || _v2 < 0)) : -(__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 < 0 || _v2 > 0));
+			return 0;
+			case INT16:
+			int16_t	r16;
+			*overflow = (__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 > 0 || _v2 < 0)) ? (__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 > 0 || _v2 < 0)) : -(__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 < 0 || _v2 > 0));
+			return 0;
+			case INT32:
+			int32_t	r32;
+			*overflow = (__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 > 0 || _v2 < 0)) ? (__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 > 0 || _v2 < 0)) : -(__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 < 0 || _v2 > 0));
+			return 0;
+			default:
+			return 0;
+		}
+	} else if ( type < DOUBLE ) {
+		float	_v1 = std::stof( v1->toString() );
+		float	_v2 = std::stof( v2->toString() );
+		float	_floatMaxHalf = std::numeric_limits<float>::max() / 2.0f;
+		float	_floatMinHalf = std::numeric_limits<float>::min() / 2.0f;
+
+		return (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) ||
+						-(_v1 < _floatMinHalf && _v2 < _floatMinHalf);
+	} else {
+		double	_v1 = std::stod( v1->toString() );
+		double	_v2 = std::stod( v2->toString() );
+		double	_doubleMaxHalf = std::numeric_limits<double>::max() / 2.0f;
+		double	_doubleMinHalf = std::numeric_limits<double>::min() / 2.0f;
+
+		return (_v1 > _doubleMaxHalf && _v2 > _doubleMaxHalf) ||
+						-(_v1 < _doubleMinHalf && _v2 < _doubleMinHalf);
+	}
+}
+
+int	Cpu::_mul_overflow( IOperand *v1, IOperand *v2, eOperandType type ) const {
+	if ( type < FLOAT ) {
+		int32_t	_v1 = std::stoi( v1->toString() );
+		int32_t	_v2 = std::stoi( v2->toString() );
+
+		switch ( type ) {
+			case INT8:
+			int8_t	r8;
+			return __builtin_mul_overflow( _v1, _v2, &r8 );
+			case INT16:
+			int16_t	r16;
+			return __builtin_add_overflow( _v1, _v2, &r16 );
+			case INT32:
+			int32_t	r32;
+			return __builtin_add_overflow( _v1, _v2, &r32 );
+			default:
+			return 0;
+		}
+	} else if ( type < DOUBLE ) {
+		float	_v1 = std::stof( v1->toString() );
+		float	_v2 = std::stof( v2->toString() );
+		float	_floatMaxHalf = std::numeric_limits<float>::max() / 2.0f;
+		float	_floatMinHalf = std::numeric_limits<float>::min() / 2.0f;
+
+		return (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) ||
+						-(_v1 < _floatMinHalf && _v2 < _floatMinHalf);
+	} else {
+		double	_v1 = std::stod( v1->toString() );
+		double	_v2 = std::stod( v2->toString() );
+		double	_doubleMaxHalf = std::numeric_limits<double>::max() / 2.0f;
+		double	_doubleMinHalf = std::numeric_limits<double>::min() / 2.0f;
+
+		return (_v1 > _doubleMaxHalf && _v2 > _doubleMaxHalf) ||
+						-(_v1 < _doubleMinHalf && _v2 < _doubleMinHalf);
+	}
 }
 
 // DEBUG
@@ -704,4 +857,16 @@ Cpu::FloatingPointException::FloatingPointException( void ) throw() {}
 Cpu::FloatingPointException::~FloatingPointException( void ) throw() {}
 const char * Cpu::FloatingPointException::what( void ) const throw() {
 	return "Error : Floating point exception.";
+}
+
+Cpu::OverflowException::OverflowException( void ) throw() {}
+Cpu::OverflowException::~OverflowException( void ) throw() {}
+const char * Cpu::OverflowException::what( void ) const throw() {
+	return "Error : Overflow exception.";
+}
+
+Cpu::UnderflowException::UnderflowException( void ) throw() {}
+Cpu::UnderflowException::~UnderflowException( void ) throw() {}
+const char * Cpu::UnderflowException::what( void ) const throw() {
+	return "Error : Underflow exception.";
 }

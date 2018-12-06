@@ -1,6 +1,6 @@
 NAME = avm
 CC = g++
-CFLAGS =# -Werror -Wextra -Wall
+CFLAGS = -stdlib=libc++# -Werror -Wextra -Wall
 DEBUGFLAGS =# -fsanitize=address -g3
 LFLAGS =# -lasan
 

@@ -47,7 +47,8 @@ private:
 
 	eInstruction		_getInstruction(
 		std::string const str,
-		std::smatch *sm
+		std::smatch *sm,
+		std::string **s
 	);
 	int							_getStdin( void );
 	int							_getFile( char const *const filename );
@@ -56,8 +57,7 @@ private:
 	int							_regValidInstruction(
 		int const line,
 		std::string const str,
-		std::string *matchstr1,
-		std::string *matchstr2
+		std::string **matchstr2
 	);
 	int							_regValidSm(
 		int const line,
@@ -76,6 +76,11 @@ private:
 	int		_div( void );
 	int		_mod( void );
 	int		_print( void );
+
+	/* OVERFLOW CHECK ==========================================================*/
+	int	_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const;
+	int	_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const;
+	int	_mul_overflow( IOperand *v1, IOperand *v2, eOperandType type ) const;
 
 	void	_printInput( void );// DEBUG
 
@@ -167,11 +172,27 @@ public:
 		virtual const char *what( void ) const throw();
 	};
 
-	/* DIVISION BY 0 EXCEPTION ===================================================*/
+	/* DIVISION BY 0 EXCEPTION =================================================*/
 	class FloatingPointException : public std::exception {
 	public:
 		FloatingPointException( void ) throw();
 		~FloatingPointException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
+	/* OVERFLOW EXCEPTION ======================================================*/
+	class OverflowException : public std::exception {
+	public:
+		OverflowException( void ) throw();
+		~OverflowException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
+	/* UNDERFLOW EXCEPTION =====================================================*/
+	class UnderflowException : public std::exception {
+	public:
+		UnderflowException( void ) throw();
+		~UnderflowException( void ) throw();
 		virtual const char *what( void ) const throw();
 	};
 
