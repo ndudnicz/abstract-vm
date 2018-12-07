@@ -120,6 +120,8 @@ int		Cpu::run( int ac, char const **av ) {
 		std::cout << e.what() << std::endl;
 	} catch (Cpu::UnderflowException &e) {
 		std::cout << e.what() << std::endl;
+	} catch (Cpu::NoExitAtTheEndException &e) {
+		std::cout << e.what() << std::endl;
 	}
 	return 0;
 }
@@ -164,17 +166,22 @@ int		Cpu::_validInput( void ) {
 	std::string													*matchstr2 = NULL;
 
 	for (; it < this->_input.end(); it++, line++) {
-		if ( (*it).length() > 0 ) {
-			try {
-				// std::cout << "*it: "<< *it << '\n'; // DEBUG
-				if ( this->_regValidInstruction( line, *it, &matchstr2 ) == 0 ) {
-					static_cast<void>(this->_regValidSm( line, *matchstr2 ));
-					if ( matchstr2 ) {
-						delete matchstr2;
+		// std::cout << ((*it).compare( std::string("exit") ) == 0) << " " << *it << '\n';
+		if ( ((*it).compare( std::string("exit") ) == 0 && (it + 1) != this->_input.end()) || (*it).compare( std::string("exit") ) != 0 && (it + 1) == this->_input.end() ) {
+			throw Cpu::NoExitAtTheEndException();
+		} else {
+			if ( (*it).length() > 0 ) {
+				try {
+					// std::cout << "*it: "<< *it << '\n'; // DEBUG
+					if ( this->_regValidInstruction( line, *it, &matchstr2 ) == 0 ) {
+						static_cast<void>(this->_regValidSm( line, *matchstr2 ));
+						if ( matchstr2 ) {
+							delete matchstr2;
+						}
 					}
+				} catch (...) {
+					throw ;
 				}
-			} catch (...) {
-				throw ;
 			}
 		}
 	}
@@ -345,7 +352,7 @@ int		Cpu::_regValidSm(
 			strs << line;
 			std::string					str1( EXCEP_INVALID_VALUE );
 			std::string					str2( strs.str() );
-				// std::cout << "yo" << '\n';
+			// std::cout << "yo" << '\n';
 			throw Cpu::InvalidValueException( str1 + str2 );
 		}
 
@@ -420,7 +427,7 @@ int		Cpu::_exec( void ) {
 	return 0;
 }
 
-	/* INSTRUCTIONS ============================================================*/
+/* INSTRUCTIONS ============================================================*/
 
 int	Cpu::_push( std::string str ) {
 	std::vector<IOperand*>::iterator	it;
@@ -672,7 +679,7 @@ int	Cpu::_print( void ) {
 	}
 	return 0;
 }
-	/* OVERFLOW CHECK ==========================================================*/
+/* OVERFLOW CHECK ==========================================================*/
 int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const {
 	*overflow = 0;
 	if ( type < FLOAT ) {
@@ -708,7 +715,7 @@ int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 			*overflow = 0;
 		}
 		return 0;
-						;
+		;
 	} else {
 		double	_v1 = std::stod( v1->toString() );
 		double	_v2 = std::stod( v2->toString() );
@@ -759,7 +766,7 @@ int	Cpu::_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 			*overflow = 0;
 		}
 		return 0;
-						;
+		;
 	} else {
 		double	_v1 = std::stod( v1->toString() );
 		double	_v2 = std::stod( v2->toString() );
@@ -991,4 +998,10 @@ Cpu::UnderflowException::UnderflowException( void ) throw() {}
 Cpu::UnderflowException::~UnderflowException( void ) throw() {}
 const char * Cpu::UnderflowException::what( void ) const throw() {
 	return "Error : Underflow exception.";
+}
+
+Cpu::NoExitAtTheEndException::NoExitAtTheEndException( void ) throw() {}
+Cpu::NoExitAtTheEndException::~NoExitAtTheEndException( void ) throw() {}
+const char * Cpu::NoExitAtTheEndException::what( void ) const throw() {
+	return "Error : 'exit' keyword missing at end of input.";
 }

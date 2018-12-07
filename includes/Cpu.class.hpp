@@ -197,6 +197,14 @@ public:
 		virtual const char *what( void ) const throw();
 	};
 
+	/* NO EXIT AT THE END EXCEPTION ============================================*/
+	class NoExitAtTheEndException : public std::exception {
+	public:
+		NoExitAtTheEndException( void ) throw();
+		~NoExitAtTheEndException( void ) throw();
+		virtual const char *what( void ) const throw();
+	};
+
 };
 
 #endif
