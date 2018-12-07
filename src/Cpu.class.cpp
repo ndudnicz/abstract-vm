@@ -39,45 +39,45 @@ eInstruction	Cpu::_getInstruction(
 	std::regex const	regComment(REG_COMMENT);
 
 	if ( std::regex_match( str, *sm, regPush ) == true ) {
-		std::cout << "ddd: "<< (*sm)[1] << '\n';
+		// std::cout << "ddd: "<< (*sm)[1] << '\n';
 		*s = new std::string( (*sm)[1] );
-		std::cout << "push" << '\n'; // DEBUG
+		// std::cout << "push" << '\n'; // DEBUG
 		return EIPUSH;
 	} else if ( std::regex_match( str, *sm, regAssert ) == true ) {
-		std::cout << "assert" << '\n'; // DEBUG
+		// std::cout << "assert" << '\n'; // DEBUG
 		return EIASSERT;
 	} else if ( std::regex_match( str, *sm, regPop ) == true ) {
-		std::cout << "pop" << '\n'; // DEBUG
+		// std::cout << "pop" << '\n'; // DEBUG
 		return EIPOP;
 	} else if ( std::regex_match( str, *sm, regDump ) == true ) {
-		std::cout << "dump" << '\n'; // DEBUG
+		// std::cout << "dump" << '\n'; // DEBUG
 		return EIDUMP;
 	} else if ( std::regex_match( str, *sm, regAdd ) == true ) {
-		std::cout << "add" << '\n'; // DEBUG
+		// std::cout << "add" << '\n'; // DEBUG
 		return EIADD;
 	} else if ( std::regex_match( str, *sm, regSub ) == true ) {
-		std::cout << "sub" << '\n'; // DEBUG
+		// std::cout << "sub" << '\n'; // DEBUG
 		return EISUB;
 	} else if ( std::regex_match( str, *sm, regMul ) == true ) {
-		std::cout << "mul" << '\n'; // DEBUG
+		// std::cout << "mul" << '\n'; // DEBUG
 		return EIMUL;
 	} else if ( std::regex_match( str, *sm, regDiv ) == true ) {
-		std::cout << "div" << '\n'; // DEBUG
+		// std::cout << "div" << '\n'; // DEBUG
 		return EIDIV;
 	} else if ( std::regex_match( str, *sm, regMod ) == true ) {
-		std::cout << "mod" << '\n'; // DEBUG
+		// std::cout << "mod" << '\n'; // DEBUG
 		return EIMOD;
 	} else if ( std::regex_match( str, *sm, regPrint ) == true ) {
-		std::cout << "print" << '\n'; // DEBUG
+		// std::cout << "print" << '\n'; // DEBUG
 		return EIPRINT;
 	} else if ( std::regex_match( str, *sm, regExit ) == true ) {
-		std::cout << "exit" << '\n'; // DEBUG
+		// std::cout << "exit" << '\n'; // DEBUG
 		return EIEXIT;
 	} else if ( std::regex_match( str, *sm, regComment ) == true ) {
-		std::cout << "comment" << '\n'; // DEBUG
+		// std::cout << "comment" << '\n'; // DEBUG
 		return EICOMMENT;
 	} else {
-		std::cout << "invalid" << '\n'; // DEBUG
+		// std::cout << "invalid" << '\n'; // DEBUG
 		return EIINVALID;
 	}
 }
@@ -166,7 +166,7 @@ int		Cpu::_validInput( void ) {
 	for (; it < this->_input.end(); it++, line++) {
 		if ( (*it).length() > 0 ) {
 			try {
-				std::cout << "*it: "<< *it << '\n'; // DEBUG
+				// std::cout << "*it: "<< *it << '\n'; // DEBUG
 				if ( this->_regValidInstruction( line, *it, &matchstr2 ) == 0 ) {
 					static_cast<void>(this->_regValidSm( line, *matchstr2 ));
 					if ( matchstr2 ) {
@@ -212,7 +212,7 @@ int		Cpu::_regValidSm(
 	std::regex	regDouble(REG_DOUBLE);
 	std::smatch	typeSm;
 
-	std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
+	// std::cout << "_regValidSm: " << sm1 << '\n'; // DEBUG
 
 	/* INT ===================================================================*/
 	if ( std::regex_match( sm1, typeSm, regInt ) == true ) {
@@ -345,12 +345,12 @@ int		Cpu::_regValidSm(
 			strs << line;
 			std::string					str1( EXCEP_INVALID_VALUE );
 			std::string					str2( strs.str() );
-				std::cout << "yo" << '\n';
+				// std::cout << "yo" << '\n';
 			throw Cpu::InvalidValueException( str1 + str2 );
 		}
 
 	} else {
-		std::cout << "heeeeere" << '\n'; // DEBUG
+		// std::cout << "heeeeere" << '\n'; // DEBUG
 		std::cout << typeSm[0] << '\n';
 		std::ostringstream	strs;
 		strs << line;
@@ -372,7 +372,7 @@ int		Cpu::_exec( void ) {
 			try {
 				switch ( this->_getInstruction( *it, &sm, &s ) ) {
 					case EIPUSH:
-					std::cout << "exec: " << *s << '\n'; // DEBUG
+					// std::cout << "exec: " << *s << '\n'; // DEBUG
 					this->_push( *s );
 					break;
 					case EIASSERT:
