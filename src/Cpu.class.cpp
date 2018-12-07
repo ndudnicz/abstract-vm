@@ -5,6 +5,7 @@
 #include "Operand.class.hpp"
 #include <iomanip>
 #include "OperandFactory.class.hpp"
+#include <float.h>
 
 /* STATIC VARIABLES ==========================================================*/
 
@@ -186,7 +187,7 @@ int		Cpu::_regValidInstruction(
 ) {
 	std::smatch smlocal;
 	eInstruction const i = this->_getInstruction( str, &smlocal, matchstr2 );
-	std::cout << "matchstr2: " << **matchstr2 << '\n';
+	// std::cout << "matchstr2: " << **matchstr2 << '\n';
 
 	if ( i <= EIASSERT ) {
 		return 0;
@@ -577,17 +578,24 @@ int	Cpu::_mul( void ) {
 		std::vector<IOperand*>::iterator	it = this->_stack.begin();
 		IOperand													*v1 = *it;
 		IOperand													*v2 = *(it + 1);
-
-		IOperand* result = const_cast<IOperand*>(*v2 * *v1);
-		this->_stack.erase( this->_stack.begin() );
-		this->_stack.erase( this->_stack.begin() );
-		delete v1;
-		delete v2;
-		it = this->_stack.begin();
-		// std::cout << result->toString() << '\n'; // DEBUG
-		// std::cout << result->getType() << '\n'; // DEBUG
-		this->_stack.insert( it, result );
-		return 0;
+		int 															overflow;
+		this->_mul_overflow( v1, v2, MAX( v1->getType(), v2->getType() ), &overflow );
+		if ( overflow > 0 ) {
+			throw Cpu::OverflowException();
+		} else if ( overflow < 0 ) {
+			throw Cpu::UnderflowException();
+		} else {
+			IOperand* result = const_cast<IOperand*>(*v2 * *v1);
+			this->_stack.erase( this->_stack.begin() );
+			this->_stack.erase( this->_stack.begin() );
+			delete v1;
+			delete v2;
+			it = this->_stack.begin();
+			// std::cout << result->toString() << '\n'; // DEBUG
+			// std::cout << result->getType() << '\n'; // DEBUG
+			this->_stack.insert( it, result );
+			return 0;
+		}
 	} else {
 		throw Cpu::NotEnoughElementsInStackException();
 	}
@@ -689,20 +697,29 @@ int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 	} else if ( type < DOUBLE ) {
 		float	_v1 = std::stof( v1->toString() );
 		float	_v2 = std::stof( v2->toString() );
-		float	_floatMaxHalf = std::numeric_limits<float>::max() / 2.0f;
-		float	_floatMinHalf = std::numeric_limits<float>::min() / 2.0f;
+		float result = _v1 + _v2;
 
-		*overflow = (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) ? (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) : -(_v1 < _floatMinHalf && _v2 < _floatMinHalf);
+		if ( (result == _v1 || result == std::numeric_limits<float>::infinity()) && _v1 > 0 ) {
+			*overflow = 1;
+		} else if ( (result == _v1 || result == -std::numeric_limits<float>::infinity()) && _v1 < 0 ) {
+			*overflow = -1;
+		} else {
+			*overflow = 0;
+		}
 		return 0;
-		// return (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) ||
 						;
 	} else {
 		double	_v1 = std::stod( v1->toString() );
 		double	_v2 = std::stod( v2->toString() );
-		double	_doubleMaxHalf = std::numeric_limits<double>::max() / 2.0f;
-		double	_doubleMinHalf = std::numeric_limits<double>::min() / 2.0f;
+		double result = _v1 + _v2;
 
-		*overflow = (_v1 > _doubleMaxHalf && _v2 > _doubleMaxHalf) ? (_v1 > _doubleMaxHalf && _v2 > _doubleMaxHalf) : -(_v1 < _doubleMinHalf && _v2 < _doubleMinHalf);
+		if ( (result == _v1 || result == std::numeric_limits<double>::infinity()) && _v1 > 0 ) {
+			*overflow = 1;
+		} else if ( (result == _v1 || result == -std::numeric_limits<double>::infinity()) && _v1 < 0 ) {
+			*overflow = -1;
+		} else {
+			*overflow = 0;
+		}
 		return 0;
 	}
 }
@@ -731,23 +748,34 @@ int	Cpu::_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 	} else if ( type < DOUBLE ) {
 		float	_v1 = std::stof( v1->toString() );
 		float	_v2 = std::stof( v2->toString() );
-		float	_floatMaxHalf = std::numeric_limits<float>::max() / 2.0f;
-		float	_floatMinHalf = std::numeric_limits<float>::min() / 2.0f;
+		float result = _v1 + _v2;
 
-		return (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) ||
-						-(_v1 < _floatMinHalf && _v2 < _floatMinHalf);
+		if ( (result == _v1 || result == std::numeric_limits<float>::infinity()) && _v1 > 0 ) {
+			*overflow = 1;
+		} else if ( (result == _v1 || result == -std::numeric_limits<float>::infinity()) && _v1 < 0 ) {
+			*overflow = -1;
+		} else {
+			*overflow = 0;
+		}
+		return 0;
+						;
 	} else {
 		double	_v1 = std::stod( v1->toString() );
 		double	_v2 = std::stod( v2->toString() );
-		double	_doubleMaxHalf = std::numeric_limits<double>::max() / 2.0f;
-		double	_doubleMinHalf = std::numeric_limits<double>::min() / 2.0f;
+		double result = _v1 + _v2;
 
-		return (_v1 > _doubleMaxHalf && _v2 > _doubleMaxHalf) ||
-						-(_v1 < _doubleMinHalf && _v2 < _doubleMinHalf);
+		if ( (result == _v1 || result == std::numeric_limits<double>::infinity()) && _v1 > 0 ) {
+			*overflow = 1;
+		} else if ( (result == _v1 || result == -std::numeric_limits<double>::infinity()) && _v1 < 0 ) {
+			*overflow = -1;
+		} else {
+			*overflow = 0;
+		}
+		return 0;
 	}
 }
 
-int	Cpu::_mul_overflow( IOperand *v1, IOperand *v2, eOperandType type ) const {
+int	Cpu::_mul_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const {
 	if ( type < FLOAT ) {
 		int32_t	_v1 = std::stoi( v1->toString() );
 		int32_t	_v2 = std::stoi( v2->toString() );
@@ -755,32 +783,71 @@ int	Cpu::_mul_overflow( IOperand *v1, IOperand *v2, eOperandType type ) const {
 		switch ( type ) {
 			case INT8:
 			int8_t	r8;
-			return __builtin_mul_overflow( _v1, _v2, &r8 );
+			*overflow = (__builtin_mul_overflow( _v2, _v1, &r8 ) && ((_v1 > 0 && _v2 > 0) || (_v1 < 0 && _v2 < 0))) ? (__builtin_mul_overflow( _v2, _v1, &r8 ) && ((_v1 > 0 && _v2 > 0) || (_v1 < 0 && _v2 < 0))) : -(__builtin_mul_overflow( _v2, _v1, &r8 ) && (_v1 < 0 || _v2 < 0));
+			return 0;
 			case INT16:
 			int16_t	r16;
-			return __builtin_add_overflow( _v1, _v2, &r16 );
+			*overflow = (__builtin_mul_overflow( _v2, _v1, &r16 ) && ((_v1 > 0 && _v2 > 0) || (_v1 < 0 && _v2 < 0))) ? (__builtin_mul_overflow( _v2, _v1, &r16 ) && ((_v1 > 0 && _v2 > 0) || (_v1 < 0 && _v2 < 0))) : -(__builtin_mul_overflow( _v2, _v1, &r16 ) && (_v1 < 0 || _v2 < 0));
+			return 0;
 			case INT32:
 			int32_t	r32;
-			return __builtin_add_overflow( _v1, _v2, &r32 );
+			*overflow = (__builtin_mul_overflow( _v2, _v1, &r32 ) && ((_v1 > 0 && _v2 > 0) || (_v1 < 0 && _v2 < 0))) ? (__builtin_mul_overflow( _v2, _v1, &r32 ) && ((_v1 > 0 && _v2 > 0) || (_v1 < 0 && _v2 < 0))) : -(__builtin_mul_overflow( _v2, _v1, &r32 ) && (_v1 < 0 || _v2 < 0));
+			return 0;
 			default:
 			return 0;
 		}
 	} else if ( type < DOUBLE ) {
 		float	_v1 = std::stof( v1->toString() );
 		float	_v2 = std::stof( v2->toString() );
-		float	_floatMaxHalf = std::numeric_limits<float>::max() / 2.0f;
-		float	_floatMinHalf = std::numeric_limits<float>::min() / 2.0f;
 
-		return (_v1 > _floatMaxHalf && _v2 > _floatMaxHalf) ||
-						-(_v1 < _floatMinHalf && _v2 < _floatMinHalf);
+		if ( _v1 == 0.0f || _v2 == 0.0f ) {
+			*overflow = 0;
+			return 0;
+		}
+		if ( (_v1 > 0.0f && _v2 > 0.0f) || (_v1 < 0.0f && _v2 < 0.0f) ) {
+			if (_v1 < 0.0f && _v2 < 0.0f) {
+				_v1 = -_v1;
+				_v2 = -_v2;
+			}
+			if ( (( _v1 * _v2 ) / _v2) != _v1 ) {
+				*overflow = 1;
+			} else {
+				*overflow = 0;
+			}
+		} else {
+			if ( (( _v1 * _v2 ) / _v2) != _v1 && (( _v1 * _v2 ) / _v1) != _v2 ) {
+				*overflow = -1;
+			} else {
+				*overflow = 0;
+			}
+		}
+		return 0;
 	} else {
 		double	_v1 = std::stod( v1->toString() );
 		double	_v2 = std::stod( v2->toString() );
-		double	_doubleMaxHalf = std::numeric_limits<double>::max() / 2.0f;
-		double	_doubleMinHalf = std::numeric_limits<double>::min() / 2.0f;
 
-		return (_v1 > _doubleMaxHalf && _v2 > _doubleMaxHalf) ||
-						-(_v1 < _doubleMinHalf && _v2 < _doubleMinHalf);
+		if ( _v1 == static_cast<double>(0) || _v2 == static_cast<double>(0) ) {
+			*overflow = 0;
+			return 0;
+		}
+		if ( (_v1 > static_cast<double>(0) && _v2 > static_cast<double>(0)) || (_v1 < static_cast<double>(0) && _v2 < static_cast<double>(0)) ) {
+			if (_v1 < static_cast<double>(0) && _v2 < static_cast<double>(0)) {
+				_v1 = -_v1;
+				_v2 = -_v2;
+			}
+			if ( (( _v1 * _v2 ) / _v2) != _v1 ) {
+				*overflow = 1;
+			} else {
+				*overflow = 0;
+			}
+		} else {
+			if ( (( _v1 * _v2 ) / _v2) != _v1 && (( _v1 * _v2 ) / _v1) != _v2 ) {
+				*overflow = -1;
+			} else {
+				*overflow = 0;
+			}
+		}
+		return 0;
 	}
 }
 
