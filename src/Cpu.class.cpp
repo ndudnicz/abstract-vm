@@ -495,7 +495,6 @@ int	Cpu::_add( void ) {
 		int 															overflow;
 		this->_add_overflow( v1, v2, MAX( v1->getType(), v2->getType() ), &overflow );
 
-		std::cout << overflow << '\n';
 		if ( overflow > 0 ) {
 			throw Cpu::OverflowException();
 		} else if ( overflow < 0 ) {
@@ -523,19 +522,23 @@ int	Cpu::_div( void ) {
 		IOperand													*v1 = *it;
 		IOperand													*v2 = *(it + 1);
 
-		// std::cout << "div: " << v2->toString() << "/" << v1->toString() << '\n'; // DEBUG
 		if ( std::stod( (*it)->toString() ) != static_cast<double>(0) ) {
-			// TODO OP HERE
-			IOperand* result = const_cast<IOperand*>(*v2 / *v1);
-			this->_stack.erase( this->_stack.begin() );
-			this->_stack.erase( this->_stack.begin() );
-			delete v1;
-			delete v2;
-			it = this->_stack.begin();
-			// std::cout << result->toString() << '\n'; // DEBUG
-			// std::cout << result->getType() << '\n'; // DEBUG
-			this->_stack.insert( it, result );
-			return 0;
+			int 															overflow;
+			this->_div_overflow( v1, v2, MAX( v1->getType(), v2->getType() ), &overflow );
+			if ( overflow > 0 ) {
+				throw Cpu::OverflowException();
+			} else if ( overflow < 0 ) {
+				throw Cpu::UnderflowException();
+			} else {
+				IOperand* result = const_cast<IOperand*>(*v2 / *v1);
+				this->_stack.erase( this->_stack.begin() );
+				this->_stack.erase( this->_stack.begin() );
+				delete v1;
+				delete v2;
+				it = this->_stack.begin();
+				this->_stack.insert( it, result );
+				return 0;
+			}
 		} else {
 			throw Cpu::FloatingPointException();
 		}
@@ -643,7 +646,6 @@ int	Cpu::_pop( void ) {
 
 int	Cpu::_dump( void ) {
 	std::vector<IOperand*>::iterator	it = this->_stack.begin();
-// std::cout << "coucou" << '\n';
 	for (; it != this->_stack.end(); it++) {
 		std::ostringstream	strs;
 		if ( (*it)->getType() < FLOAT ) {
@@ -671,7 +673,6 @@ int	Cpu::_print( void ) {
 	return 0;
 }
 	/* OVERFLOW CHECK ==========================================================*/
-#include <stdio.h> // DEBUG
 int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const {
 	*overflow = 0;
 	if ( type < FLOAT ) {
@@ -846,6 +847,60 @@ int	Cpu::_mul_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 			} else {
 				*overflow = 0;
 			}
+		}
+		return 0;
+	}
+}
+int	Cpu::_div_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const {
+	if ( type < FLOAT ) {
+		*overflow = 0;
+		return 0;
+	} else if ( type < DOUBLE ) {
+		float	_v1 = std::stof( v1->toString() );
+		float	_v2 = std::stof( v2->toString() );
+
+		if ( (_v1 > 0.0f && _v2 > 0.0f) || (_v1 < 0.0f && _v2 < 0.0f) ) {
+			if (_v1 < 0.0f && _v2 < 0.0f) {
+				_v1 = -_v1;
+				_v2 = -_v2;
+			}
+			if ( (( _v2 / _v1 ) * _v1) != _v2 ) {
+				*overflow = 1;
+			} else {
+				*overflow = 0;
+			}
+		} else if ( _v1 < 0.0f ) {
+			if ( (( _v2 / _v1 ) * _v1) != _v2 ) {
+				*overflow = -1;
+			} else {
+				*overflow = 0;
+			}
+		} else {
+			*overflow = 0;
+		}
+		return 0;
+	} else {
+		double	_v1 = std::stod( v1->toString() );
+		double	_v2 = std::stod( v2->toString() );
+
+		if ( (_v1 > static_cast<double>(0) && _v2 > static_cast<double>(0)) || (_v1 < static_cast<double>(0) && _v2 < static_cast<double>(0)) ) {
+			if (_v1 < static_cast<double>(0) && _v2 < static_cast<double>(0)) {
+				_v1 = -_v1;
+				_v2 = -_v2;
+			}
+			if ( (( _v2 / _v1 ) * _v1) != _v2 ) {
+				*overflow = 1;
+			} else {
+				*overflow = 0;
+			}
+		} else if ( _v1 < static_cast<double>(0) ) {
+			if ( (( _v2 / _v1 ) * _v1) != _v2 ) {
+				*overflow = -1;
+			} else {
+				*overflow = 0;
+			}
+		} else {
+			*overflow = 0;
 		}
 		return 0;
 	}

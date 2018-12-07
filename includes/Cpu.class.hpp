@@ -81,6 +81,7 @@ private:
 	int	_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const;
 	int	_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const;
 	int	_mul_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const;
+	int	_div_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *overflow ) const;
 
 	void	_printInput( void );// DEBUG
 

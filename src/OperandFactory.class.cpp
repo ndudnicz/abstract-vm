@@ -33,10 +33,8 @@ IOperand const* OperandFactory::createInt16( std::string const &str, eOperandTyp
 IOperand const* OperandFactory::createInt32( std::string const &str, eOperandType type ) {
 	return new Operand<int32_t>( str, type );
 }
-
 IOperand const* OperandFactory::createFloat( std::string const &str, eOperandType type ) {
 	return new Operand<float>( str, type );
-
 }
 
 IOperand const* OperandFactory::createDouble( std::string const &str, eOperandType type ) {
