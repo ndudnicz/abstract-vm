@@ -649,7 +649,9 @@ int	Cpu::_sub( void ) {
 
 int	Cpu::_pop( void ) {
 	if ( this->_stack.size() > 0 ) {
+		IOperand *v = *(this->_stack.begin());
 		this->_stack.erase(this->_stack.begin());
+		delete v;
 		return 0;
 	} else {
 		throw Cpu::PopEmptyStackException();
