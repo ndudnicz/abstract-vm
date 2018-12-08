@@ -2,7 +2,6 @@
 # define CPU_CLASS_HPP
 
 # include "IOperand.hpp"
-// # include "Stack.class.hpp"
 # include <vector>
 # include <iostream>
 # include <stdexcept>
