@@ -119,7 +119,7 @@ int		Cpu::_getStdin( void ) {
 			throw Cpu::DidntGetEndOfInputException();
 		} else if ( input.compare( END_OF_INPUT ) == 0 ) {
 			return 0;
-		} else {
+		} else if ( input.length() > 0 ) {
 			this->_input.push_back( input );
 		}
 	}
@@ -131,7 +131,9 @@ int		Cpu::_getFile( char const *const filename ) {
 
 	if ( file.good() ) {
 		while ( std::getline( file, line ) ) {
-			this->_input.push_back( line );
+			if ( line.length() > 0 ) {
+				this->_input.push_back( line );
+			}
 		}
 		file.close();
 	} else {
@@ -146,9 +148,11 @@ int		Cpu::_validInput( void ) {
 	std::vector<std::string>::iterator	it = this->_input.begin();
 	int																	line = 1;
 	std::string													*matchstr2 = NULL;
+	std::smatch													sm;
+	std::regex const										regExit(REG_EXIT);
 
 	for (; it < this->_input.end(); it++, line++) {
-		if ( ((*it).compare( std::string("exit") ) == 0 && (it + 1) != this->_input.end()) || ((*it).compare( std::string("exit") ) != 0 && (it + 1) == this->_input.end() ) ) {
+		if ( ( /*(*it).compare( std::string("exit")*/ std::regex_match( *it, sm, regExit ) == true && (it + 1) != this->_input.end() ) || ( /*(*it).compare( std::string("exit")*/ std::regex_match( *it, sm, regExit ) != true && (it + 1) == this->_input.end() ) ) {
 			throw Cpu::NoExitAtTheEndException();
 		} else {
 			if ( (*it).length() > 0 ) {
