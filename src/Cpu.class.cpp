@@ -349,7 +349,6 @@ int		Cpu::_regValidSm(
 int		Cpu::_exec( void ) {
 	std::vector<std::string>::iterator	it = this->_input.begin();
 	std::smatch													sm;
-	IOperand														*o;
 	std::string													*s = NULL;
 
 	for (; it < this->_input.end(); it++) {
