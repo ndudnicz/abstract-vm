@@ -1,8 +1,7 @@
 NAME = avm
 CC = g++
-CFLAGS = -stdlib=libc++# -Werror -Wextra -Wall
-DEBUGFLAGS =# -fsanitize=address -g3
-LFLAGS =# -lasan
+CFLAGS = -Werror -Wextra -Wall
+DEBUGFLAGS = # -fsanitize=address -g3
 
 # SOURCE FOLDERS ==============================================================#
 
@@ -21,9 +20,6 @@ PATH_INCLUDES = includes
 SRC = main.cpp \
 Operand.class.cpp \
 Cpu.class.cpp \
-add_overflow.cpp \
-sub_overflow.cpp \
-mul_overflow.cpp \
 OperandFactory.class.cpp \
 
 # OBJECTS LIST ================================================================#
@@ -47,6 +43,6 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) -o $@ $(OBJ)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(LFLAGS) -MMD -o $@ -c $< -I $(PATH_INCLUDES)
+	$(CC) -MMD -o $@ -c $< -I $(PATH_INCLUDES)
 
 -include $(OBJ:.o=.d)
