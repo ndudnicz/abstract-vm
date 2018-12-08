@@ -152,7 +152,7 @@ int		Cpu::_validInput( void ) {
 	std::regex const										regExit(REG_EXIT);
 
 	for (; it < this->_input.end(); it++, line++) {
-		if ( ( /*(*it).compare( std::string("exit")*/ std::regex_match( *it, sm, regExit ) == true && (it + 1) != this->_input.end() ) || ( /*(*it).compare( std::string("exit")*/ std::regex_match( *it, sm, regExit ) != true && (it + 1) == this->_input.end() ) ) {
+		if ( ( std::regex_match( *it, sm, regExit ) == true && (it + 1) != this->_input.end() ) || ( std::regex_match( *it, sm, regExit ) != true && (it + 1) == this->_input.end() ) ) {
 			throw Cpu::NoExitAtTheEndException();
 		} else {
 			if ( (*it).length() > 0 ) {
@@ -550,8 +550,6 @@ int	Cpu::_mod( void ) {
 			delete v1;
 			delete v2;
 			it = this->_stack.begin();
-			// std::cout << result->toString() << '\n'; // DEBUG
-			// std::cout << result->getType() << '\n'; // DEBUG
 			this->_stack.insert( it, result );
 			return 0;
 			return 0;
