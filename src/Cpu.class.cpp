@@ -1,6 +1,7 @@
 #include <Cpu.class.hpp>
 #include <sstream>
 #include <iomanip>
+#include <float.h>
 
 #include "regex_defines.hpp"
 #include "Operand.class.hpp"
@@ -294,7 +295,12 @@ int		Cpu::_regValidSm(
 
 		try {
 			float const value = std::stof( typeSm[1] );
-			if ( value == 0 || typeSm[1].length() ) {
+			std::ostringstream	strs;
+
+			strs << std::setprecision( IOperand::precisions[ FLOAT ] ) << value;
+			// std::cout << typeSm[1] << '\n';
+			// std::cout << strs.str() << '\n';
+			if ( value == 0 || value) {
 				return 0;
 			} else {
 				std::ostringstream	strs;
@@ -316,8 +322,11 @@ int		Cpu::_regValidSm(
 	} else if ( std::regex_match( sm1, typeSm, regDouble ) == true ) {
 
 		try {
-			double const value = std::stod( typeSm[1] );
-			if ( value == 0 || typeSm[1].length() ) {
+			long double const value = std::stold( typeSm[1] );
+			std::ostringstream	strs;
+
+			strs << std::setprecision( IOperand::precisions[ DOUBLE ] ) << value;
+			if ( typeSm[1].compare( strs.str() ) == 0 && (value == 0 || ( value >= DBL_MIN && value <= DBL_MAX )) ) {
 				return 0;
 			} else {
 				std::ostringstream	strs;
@@ -630,8 +639,6 @@ int	Cpu::_dump( void ) {
 		std::ostringstream	strs;
 		if ( (*it)->getType() < FLOAT ) {
 			strs << std::stoi( (*it)->toString() );
-		} else if ( (*it)->getType() < DOUBLE ) {
-			strs << std::setprecision( (*it)->getPrecision() ) << std::stof( (*it)->toString() );
 		} else {
 			strs << std::setprecision( (*it)->getPrecision() ) << std::stod( (*it)->toString() );
 		}
@@ -676,27 +683,26 @@ int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 			return 0;
 		}
 	} else if ( type < DOUBLE ) {
-		float	_v1 = std::stof( v1->toString() );
-		float	_v2 = std::stof( v2->toString() );
-		float result = _v1 + _v2;
+		long double	_v1 = std::stold( (v1->toString()).c_str() );
+		long double	_v2 = std::stold( (v2->toString()).c_str() );
+		long double	result = _v1 + _v2;
 
-		if ( (result == _v1 || result == std::numeric_limits<float>::infinity()) && _v1 > 0 ) {
+		if ( result > FLT_MAX ) {
 			*overflow = 1;
-		} else if ( (result == _v1 || result == -std::numeric_limits<float>::infinity()) && _v1 < 0 ) {
+		} else if ( result < FLT_MIN ) {
 			*overflow = -1;
 		} else {
 			*overflow = 0;
 		}
 		return 0;
-		;
 	} else {
-		double	_v1 = std::stod( v1->toString() );
-		double	_v2 = std::stod( v2->toString() );
-		double result = _v1 + _v2;
+		long double	_v1 = std::stold( v1->toString() );
+		long double	_v2 = std::stold( v2->toString() );
+		long double result = _v1 + _v2;
 
-		if ( (result == _v1 || result == std::numeric_limits<double>::infinity()) && _v1 > 0 ) {
+		if ( result > DBL_MAX ) {
 			*overflow = 1;
-		} else if ( (result == _v1 || result == -std::numeric_limits<double>::infinity()) && _v1 < 0 ) {
+		} else if ( result < DBL_MIN ) {
 			*overflow = -1;
 		} else {
 			*overflow = 0;
@@ -727,27 +733,26 @@ int	Cpu::_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 			return 0;
 		}
 	} else if ( type < DOUBLE ) {
-		float	_v1 = std::stof( v1->toString() );
-		float	_v2 = std::stof( v2->toString() );
-		float result = _v1 + _v2;
+		long double	_v1 = std::stold( (v1->toString()).c_str() );
+		long double	_v2 = std::stold( (v2->toString()).c_str() );
+		long double	result = _v2 - _v1;
 
-		if ( (result == _v1 || result == std::numeric_limits<float>::infinity()) && _v1 > 0 ) {
+		if ( result > FLT_MAX ) {
 			*overflow = 1;
-		} else if ( (result == _v1 || result == -std::numeric_limits<float>::infinity()) && _v1 < 0 ) {
+		} else if ( result < FLT_MIN ) {
 			*overflow = -1;
 		} else {
 			*overflow = 0;
 		}
 		return 0;
-		;
 	} else {
-		double	_v1 = std::stod( v1->toString() );
-		double	_v2 = std::stod( v2->toString() );
-		double result = _v1 + _v2;
+		long double	_v1 = std::stold( v1->toString() );
+		long double	_v2 = std::stold( v2->toString() );
+		long double result = _v2 - _v1;
 
-		if ( (result == _v1 || result == std::numeric_limits<double>::infinity()) && _v1 > 0 ) {
+		if ( result > DBL_MAX ) {
 			*overflow = 1;
-		} else if ( (result == _v1 || result == -std::numeric_limits<double>::infinity()) && _v1 < 0 ) {
+		} else if ( result < DBL_MIN ) {
 			*overflow = -1;
 		} else {
 			*overflow = 0;
