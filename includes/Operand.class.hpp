@@ -2,7 +2,6 @@
 # define OPERAND_CLASS_HPP
 
 # include "IOperand.hpp"
-# include <stdexcept>
 
 # define MAX(A, B) (A > B ? A : B)
 

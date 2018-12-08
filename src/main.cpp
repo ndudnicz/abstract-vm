@@ -1,6 +1,3 @@
-#include "Operand.class.hpp"
-#include <iostream>
-#include <vector>
 #include "Cpu.class.hpp"
 
 int		main(int ac, char const **av) {

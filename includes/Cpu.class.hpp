@@ -1,12 +1,11 @@
 #ifndef CPU_CLASS_HPP
 # define CPU_CLASS_HPP
 
-# include "IOperand.hpp"
-# include <vector>
 # include <iostream>
-# include <stdexcept>
 # include <fstream>
 # include <regex>
+
+# include "IOperand.hpp"
 
 # define END_OF_INPUT	";;"
 

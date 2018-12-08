@@ -1,8 +1,8 @@
-#include "Operand.class.hpp"
 #include <sstream>
-#include <iostream>
 #include <cmath>
 #include <iomanip>
+
+#include "Operand.class.hpp"
 #include "OperandFactory.class.hpp"
 
 /* STATIC VARIABLES ==========================================================*/

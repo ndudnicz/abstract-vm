@@ -1,11 +1,10 @@
 #include <Cpu.class.hpp>
 #include <sstream>
-#include "regex_defines.hpp"
-#include <limits>
-#include "Operand.class.hpp"
 #include <iomanip>
+
+#include "regex_defines.hpp"
+#include "Operand.class.hpp"
 #include "OperandFactory.class.hpp"
-#include <float.h>
 
 /* STATIC VARIABLES ==========================================================*/
 
