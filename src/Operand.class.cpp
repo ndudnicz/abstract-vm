@@ -6,7 +6,8 @@
 #include "OperandFactory.class.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
-double const	IOperand::precisions[5] = {3, 5, 10, 39 + 7, 309 + 16};
+// double const	IOperand::precisions[5] = {3, 5, 10, 39 + 7, 309 + 16};
+double const	IOperand::precisions[5] = {3, 5, 10, 7, 16};
 
 
 /* CONSTRUCTORS ==============================================================*/

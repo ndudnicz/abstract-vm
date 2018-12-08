@@ -44,6 +44,7 @@ eInstruction	Cpu::_getInstruction(
 		// std::cout << "push" << '\n'; // DEBUG
 		return EIPUSH;
 	} else if ( std::regex_match( str, *sm, regAssert ) == true ) {
+		*s = new std::string( (*sm)[1] );
 		// std::cout << "assert" << '\n'; // DEBUG
 		return EIASSERT;
 	} else if ( std::regex_match( str, *sm, regPop ) == true ) {
@@ -166,17 +167,17 @@ int		Cpu::_validInput( void ) {
 	std::string													*matchstr2 = NULL;
 
 	for (; it < this->_input.end(); it++, line++) {
-		// std::cout << ((*it).compare( std::string("exit") ) == 0) << " " << *it << '\n';
-		if ( ((*it).compare( std::string("exit") ) == 0 && (it + 1) != this->_input.end()) || (*it).compare( std::string("exit") ) != 0 && (it + 1) == this->_input.end() ) {
+		if ( ((*it).compare( std::string("exit") ) == 0 && (it + 1) != this->_input.end()) || ((*it).compare( std::string("exit") ) != 0 && (it + 1) == this->_input.end() ) ) {
 			throw Cpu::NoExitAtTheEndException();
 		} else {
 			if ( (*it).length() > 0 ) {
 				try {
 					// std::cout << "*it: "<< *it << '\n'; // DEBUG
 					if ( this->_regValidInstruction( line, *it, &matchstr2 ) == 0 ) {
-						static_cast<void>(this->_regValidSm( line, *matchstr2 ));
 						if ( matchstr2 ) {
+							static_cast<void>(this->_regValidSm( line, *matchstr2 ));
 							delete matchstr2;
+							matchstr2 = NULL;
 						}
 					}
 				} catch (...) {
@@ -358,7 +359,7 @@ int		Cpu::_regValidSm(
 
 	} else {
 		// std::cout << "heeeeere" << '\n'; // DEBUG
-		std::cout << typeSm[0] << '\n';
+		// std::cout << typeSm[0] << '\n';
 		std::ostringstream	strs;
 		strs << line;
 		std::string					str1( EXCEP_UNKNOWN_TYPE );
@@ -379,11 +380,20 @@ int		Cpu::_exec( void ) {
 			try {
 				switch ( this->_getInstruction( *it, &sm, &s ) ) {
 					case EIPUSH:
-					// std::cout << "exec: " << *s << '\n'; // DEBUG
+					// std::cout << "exec: " << *it << " s: " << *s << '\n'; // DEBUG
 					this->_push( *s );
+					if ( s ) {
+						delete s;
+						s = NULL;
+					}
 					break;
 					case EIASSERT:
+					// std::cout << "exec: " << *it << " s: " << *s << '\n'; // DEBUG
 					this->_assert( *s );
+					if ( s ) {
+						delete s;
+						s = NULL;
+					}
 					break;
 					case EIPOP:
 					this->_pop();
@@ -474,19 +484,20 @@ int	Cpu::_assert( std::string str ) {
 	std::regex	regDouble(REG_DOUBLE);
 
 	it = this->_stack.begin();
-	// std::cout << "asserting: " << str << '\n'; // DEBUG
 	if ( std::regex_match( str, typeSm, regInt ) == true ) {
-		// std::cout << "asserting: " << typeSm[2] << '\n'; // DEBUG
+	// std::cout << "assert int: " <<(*it)->toString() << " / " << typeSm[2] << " str: " << str << '\n'; // DEBUG
 		if ( std::stod( (*it)->toString() ) != std::stod( typeSm[2] ) ) {
 			throw Cpu::AssertFailedException();
 		}
 		/* FLOAT ===================================================================*/
 	} else if ( std::regex_match( str, typeSm, regFloat ) == true ) {
+	// std::cout << "assert float: " <<(*it)->toString() << " / " << typeSm[2]<< " str: " << str << '\n'; // DEBUG
 		if ( std::stod( (*it)->toString() ) != std::stod( typeSm[1] ) ) {
 			throw Cpu::AssertFailedException();
 		}
 		/* DOUBLE ==================================================================*/
 	} else if ( std::regex_match( str, typeSm, regDouble ) == true ) {
+	// std::cout << "assert double: " <<(*it)->toString() << " / " << typeSm[2]<< " str: " << str << '\n'; // DEBUG
 		if ( std::stod( (*it)->toString() ) != std::stod( typeSm[1] ) ) {
 			throw Cpu::AssertFailedException();
 		}
@@ -513,8 +524,6 @@ int	Cpu::_add( void ) {
 			delete v1;
 			delete v2;
 			it = this->_stack.begin();
-			// std::cout << "tosting: "<< result->toString() << '\n'; // DEBUG
-			// std::cout << "type: "<<result->getType() << '\n'; // DEBUG
 			this->_stack.insert( it, result );
 			return 0;
 		}
@@ -595,14 +604,13 @@ int	Cpu::_mul( void ) {
 		} else if ( overflow < 0 ) {
 			throw Cpu::UnderflowException();
 		} else {
+			// std::cout << "mul: " << (*v2).toString() << " * " << (*v1).toString() << '\n';
 			IOperand* result = const_cast<IOperand*>(*v2 * *v1);
 			this->_stack.erase( this->_stack.begin() );
 			this->_stack.erase( this->_stack.begin() );
 			delete v1;
 			delete v2;
 			it = this->_stack.begin();
-			// std::cout << result->toString() << '\n'; // DEBUG
-			// std::cout << result->getType() << '\n'; // DEBUG
 			this->_stack.insert( it, result );
 			return 0;
 		}
@@ -619,7 +627,7 @@ int	Cpu::_sub( void ) {
 		int 															overflow;
 		this->_sub_overflow( v1, v2, MAX( v1->getType(), v2->getType() ), &overflow );
 
-		std::cout << overflow << '\n';
+		// std::cout << overflow << '\n';
 		if ( overflow > 0 ) {
 			throw Cpu::OverflowException();
 		} else if ( overflow < 0 ) {
@@ -631,8 +639,6 @@ int	Cpu::_sub( void ) {
 			delete v1;
 			delete v2;
 			it = this->_stack.begin();
-			// std::cout << result->toString() << '\n'; // DEBUG
-			// std::cout << result->getType() << '\n'; // DEBUG
 			this->_stack.insert( it, result );
 			return 0;
 		}
