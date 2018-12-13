@@ -622,15 +622,15 @@ int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 		switch ( type ) {
 			case INT8:
 			int8_t	r8;
-			*overflow = (__builtin_add_overflow( _v1, _v2, &r8 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v1, _v2, &r8 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v1, _v2, &r8 ) && (_v1 < 0 || _v2 < 0));
+			*overflow = (__builtin_add_overflow( _v2, _v1, &r8 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v2, _v1, &r8 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v2, _v1, &r8 ) && (_v1 < 0 || _v2 < 0));
 			return 0;
 			case INT16:
 			int16_t	r16;
-			*overflow = (__builtin_add_overflow( _v1, _v2, &r16 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v1, _v2, &r16 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v1, _v2, &r16 ) && (_v1 < 0 || _v2 < 0));
+			*overflow = (__builtin_add_overflow( _v2, _v1, &r16 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v2, _v1, &r16 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v2, _v1, &r16 ) && (_v1 < 0 || _v2 < 0));
 			return 0;
 			case INT32:
 			int32_t	r32;
-			*overflow = (__builtin_add_overflow( _v1, _v2, &r32 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v1, _v2, &r32 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v1, _v2, &r32 ) && (_v1 < 0 || _v2 < 0));
+			*overflow = (__builtin_add_overflow( _v2, _v1, &r32 ) && (_v1 > 0 || _v2 > 0)) ? (__builtin_add_overflow( _v2, _v1, &r32 ) && (_v1 > 0 || _v2 > 0)) : -(__builtin_add_overflow( _v2, _v1, &r32 ) && (_v1 < 0 || _v2 < 0));
 			return 0;
 			default:
 			return 0;
@@ -638,7 +638,7 @@ int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 	} else if ( type < DOUBLE ) {
 		long double	_v1 = std::stold( (v1->toString()).c_str() );
 		long double	_v2 = std::stold( (v2->toString()).c_str() );
-		long double	result = _v1 + _v2;
+		long double	result = _v2 + _v1;
 		if ( result > std::numeric_limits<float>::max() ) {
 			*overflow = 1;
 		} else if ( result < -std::numeric_limits<float>::max() ) {
@@ -650,7 +650,7 @@ int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 	} else {
 		long double	_v1 = std::stold( v1->toString() );
 		long double	_v2 = std::stold( v2->toString() );
-		long double result = _v1 + _v2;
+		long double result = _v2 + _v1;
 
 		if ( result > std::numeric_limits<double>::max() ) {
 			*overflow = 1;
@@ -671,15 +671,15 @@ int	Cpu::_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 		switch ( type ) {
 			case INT8:
 			int8_t	r8;
-			*overflow = (__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 > 0 || _v2 < 0)) ? (__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 > 0 || _v2 < 0)) : -(__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 < 0 || _v2 > 0));
+			*overflow = (__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 < 0 || _v2 > 0)) ? (__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 < 0 || _v2 > 0)) : -(__builtin_sub_overflow( _v2, _v1, &r8 ) && (_v1 > 0 || _v2 < 0));
 			return 0;
 			case INT16:
 			int16_t	r16;
-			*overflow = (__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 > 0 || _v2 < 0)) ? (__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 > 0 || _v2 < 0)) : -(__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 < 0 || _v2 > 0));
+			*overflow = (__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 < 0 || _v2 > 0)) ? (__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 < 0 || _v2 > 0)) : -(__builtin_sub_overflow( _v2, _v1, &r16 ) && (_v1 > 0 || _v2 < 0));
 			return 0;
 			case INT32:
 			int32_t	r32;
-			*overflow = (__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 > 0 || _v2 < 0)) ? (__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 > 0 || _v2 < 0)) : -(__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 < 0 || _v2 > 0));
+			*overflow = (__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 < 0 || _v2 > 0)) ? (__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 < 0 || _v2 > 0)) : -(__builtin_sub_overflow( _v2, _v1, &r32 ) && (_v1 > 0 || _v2 < 0));
 			return 0;
 			default:
 			return 0;

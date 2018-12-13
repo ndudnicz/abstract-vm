@@ -6,7 +6,7 @@
 #include "OperandFactory.class.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
-double const	IOperand::precisions[5] = {0, 0, 0, 7, 16};
+double const	IOperand::precisions[5] = {3, 5, 10, 7, 16};
 
 /* CONSTRUCTORS ==============================================================*/
 
@@ -33,8 +33,8 @@ Operand<T>::operator=( Operand const & rhs ) {
 
 template <class T> IOperand const*
 Operand<T>::operator+( IOperand const & rhs ) const {
-	double							result = std::stod( this->toString() ) + std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
+	double							result = std::stod( this->toString() ) + std::stod( rhs.toString() );
 	std::ostringstream	strs;
 	result = type > INT32 ? result : floor( result );
 
@@ -44,8 +44,8 @@ Operand<T>::operator+( IOperand const & rhs ) const {
 
 template <class T> IOperand const*
 Operand<T>::operator-( IOperand const & rhs ) const {
-	double							result = std::stod( this->toString() ) - std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
+	double							result = std::stod( this->toString() ) - std::stod( rhs.toString() );
 	std::ostringstream	strs;
 	result = type > INT32 ? result : floor( result );
 
@@ -55,19 +55,19 @@ Operand<T>::operator-( IOperand const & rhs ) const {
 
 template <class T> IOperand const*
 Operand<T>::operator*( IOperand const & rhs ) const {
-	double							result = std::stod( this->toString() ) * std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
+	double							result = std::stod( this->toString() ) * std::stod( rhs.toString() );
 	std::ostringstream	strs;
 	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
 	return OperandFactory::createop( strs.str(), type );;
 }
-
+#include <iostream>
 template <class T> IOperand const*
 Operand<T>::operator/( IOperand const & rhs ) const {
+	eOperandType				type = MAX( this->getType(), rhs.getType() );
 	double							result = std::stod( this->toString() ) / std::stod( rhs.toString() );
-	eOperandType	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
 	result = type > INT32 ? result : floor( result );
 
