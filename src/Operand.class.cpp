@@ -6,7 +6,7 @@
 #include "OperandFactory.class.hpp"
 
 /* STATIC VARIABLES ==========================================================*/
-double const	IOperand::precisions[5] = {3, 5, 10, 16, 16};
+double const	IOperand::precisions[5] = {0, 0, 0, 7, 16};
 
 /* CONSTRUCTORS ==============================================================*/
 
@@ -30,14 +30,13 @@ Operand<T>::operator=( Operand const & rhs ) {
 	this->_str = rhs.toString();
 	return *this;
 }
-// #include <iostream>
+
 template <class T> IOperand const*
 Operand<T>::operator+( IOperand const & rhs ) const {
-	// std::cout << this->toString() << " + " << rhs.toString() << '\n';
 	double							result = std::stod( this->toString() ) + std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
-	// result = type > INT32 ? result : floor( result );
+	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
 	return OperandFactory::createop( strs.str(), type );
@@ -48,7 +47,7 @@ Operand<T>::operator-( IOperand const & rhs ) const {
 	double							result = std::stod( this->toString() ) - std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
-	// result = type > INT32 ? result : floor( result );
+	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
 	return OperandFactory::createop( strs.str(), type );
@@ -59,7 +58,7 @@ Operand<T>::operator*( IOperand const & rhs ) const {
 	double							result = std::stod( this->toString() ) * std::stod( rhs.toString() );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
-	// result = type > INT32 ? result : floor( result );
+	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
 	return OperandFactory::createop( strs.str(), type );;
@@ -70,7 +69,7 @@ Operand<T>::operator/( IOperand const & rhs ) const {
 	double							result = std::stod( this->toString() ) / std::stod( rhs.toString() );
 	eOperandType	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
-	// result = type > INT32 ? result : floor( result );
+	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
 	return OperandFactory::createop( strs.str(), type );;
@@ -81,7 +80,7 @@ Operand<T>::operator%( IOperand const & rhs ) const {
 	double							result = std::fmod( std::stod( this->toString() ), std::stod( rhs.toString() ) );
 	eOperandType const	type = MAX( this->getType(), rhs.getType() );
 	std::ostringstream	strs;
-	// result = type > INT32 ? result : floor( result );
+	result = type > INT32 ? result : floor( result );
 
 	strs << std::setprecision( Operand<T>::precisions[ type ] ) << result;
 	return OperandFactory::createop( strs.str(), type );

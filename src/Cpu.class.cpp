@@ -2,6 +2,8 @@
 #include <sstream>
 #include <iomanip>
 #include <float.h>
+#include <limits>
+// #include <limits.h>
 
 #include "regex_defines.hpp"
 #include "Operand.class.hpp"
@@ -212,16 +214,8 @@ int		Cpu::_regValidSm(
 			try {
 				int32_t const value = std::stoi( typeSm[2] );
 
-				if ( value == 0 || typeSm[2].length() <= 4 ) {
-					if ( value >= std::numeric_limits<int8_t>::min() && value <= std::numeric_limits<int8_t>::max() ) {
-						break;
-					} else {
-						std::ostringstream	strs;
-						strs << line;
-						std::string					str1( EXCEP_INVALID_VALUE );
-						std::string					str2( strs.str() );
-						throw Cpu::InvalidValueException( str1 + str2 );
-					}
+				if ( value == 0 || (value >= std::numeric_limits<int8_t>::min() && value <= std::numeric_limits<int8_t>::max()) ) {
+					break;
 				} else {
 					std::ostringstream	strs;
 					strs << line;
@@ -242,16 +236,7 @@ int		Cpu::_regValidSm(
 			try {
 				int32_t const value = std::stoi( typeSm[2] );
 
-				if ( value == 0 || typeSm[2].length() <= 6 ) {
-					if ( value >= std::numeric_limits<int16_t>::min() && value <= std::numeric_limits<int16_t>::max() ) {
-						break;
-					} else {
-						std::ostringstream	strs;
-						strs << line;
-						std::string					str1( EXCEP_INVALID_VALUE );
-						std::string					str2( strs.str() );
-						throw Cpu::InvalidValueException( str1 + str2 );
-					}
+				if ( value == 0 || ( value >= std::numeric_limits<int16_t>::min() && value <= std::numeric_limits<int16_t>::max() ) ) {
 					break;
 				} else {
 					std::ostringstream	strs;
@@ -271,16 +256,9 @@ int		Cpu::_regValidSm(
 			/* INT32 ===============================================================*/
 			case 32:
 			try {
-				int32_t const value = std::stoi( typeSm[2] );
-				if ( value == 0 || typeSm[2].length() <= 11 ) {
-					break;
-				} else {
-					std::ostringstream	strs;
-					strs << line;
-					std::string					str1( EXCEP_INVALID_VALUE );
-					std::string					str2( strs.str() );
-					throw Cpu::InvalidValueException( str1 + str2 );
-				}
+				std::stoi( typeSm[2] );
+
+				break;
 			} catch ( const std::out_of_range& oor ) {
 				std::ostringstream	strs;
 				strs << line;
@@ -294,22 +272,9 @@ int		Cpu::_regValidSm(
 	} else if ( std::regex_match( sm1, typeSm, regFloat ) == true ) {
 
 		try {
-			float const value = std::stof( typeSm[1] );
-			std::ostringstream	strs;
+			std::stof( typeSm[1] );
 
-			strs << std::setprecision( IOperand::precisions[ FLOAT ] ) << value;
-			// std::cout << typeSm[1] << '\n';
-			// std::cout << strs.str() << '\n';
-			if ( value == 0 || value) {
-				return 0;
-			} else {
-				std::ostringstream	strs;
-				strs << line;
-				std::string					str1( EXCEP_INVALID_VALUE );
-				std::string					str2( strs.str() );
-				throw Cpu::InvalidValueException( str1 + str2 );
-			}
-
+			return 0;
 		} catch ( const std::out_of_range& oor ) {
 			std::ostringstream	strs;
 			strs << line;
@@ -322,20 +287,9 @@ int		Cpu::_regValidSm(
 	} else if ( std::regex_match( sm1, typeSm, regDouble ) == true ) {
 
 		try {
-			long double const value = std::stold( typeSm[1] );
-			std::ostringstream	strs;
+			std::stod( typeSm[1] );
 
-			strs << std::setprecision( IOperand::precisions[ DOUBLE ] ) << value;
-			if ( typeSm[1].compare( strs.str() ) == 0 && (value == 0 || ( value >= DBL_MIN && value <= DBL_MAX )) ) {
-				return 0;
-			} else {
-				std::ostringstream	strs;
-				strs << line;
-				std::string					str1( EXCEP_INVALID_VALUE );
-				std::string					str2( strs.str() );
-				throw Cpu::InvalidValueException( str1 + str2 );
-			}
-
+			return 0;
 		} catch ( const std::out_of_range& oor ) {
 			std::ostringstream	strs;
 			strs << line;
@@ -686,10 +640,9 @@ int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 		long double	_v1 = std::stold( (v1->toString()).c_str() );
 		long double	_v2 = std::stold( (v2->toString()).c_str() );
 		long double	result = _v1 + _v2;
-
-		if ( result > FLT_MAX ) {
+		if ( result > std::numeric_limits<float>::max() ) {
 			*overflow = 1;
-		} else if ( result < FLT_MIN ) {
+		} else if ( result < -std::numeric_limits<float>::max() ) {
 			*overflow = -1;
 		} else {
 			*overflow = 0;
@@ -700,9 +653,9 @@ int	Cpu::_add_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 		long double	_v2 = std::stold( v2->toString() );
 		long double result = _v1 + _v2;
 
-		if ( result > DBL_MAX ) {
+		if ( result > std::numeric_limits<double>::max() ) {
 			*overflow = 1;
-		} else if ( result < DBL_MIN ) {
+		} else if ( result < -std::numeric_limits<double>::max() ) {
 			*overflow = -1;
 		} else {
 			*overflow = 0;
@@ -737,9 +690,9 @@ int	Cpu::_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 		long double	_v2 = std::stold( (v2->toString()).c_str() );
 		long double	result = _v2 - _v1;
 
-		if ( result > FLT_MAX ) {
+		if ( result > std::numeric_limits<float>::max() ) {
 			*overflow = 1;
-		} else if ( result < FLT_MIN ) {
+		} else if ( result < -std::numeric_limits<float>::max() ) {
 			*overflow = -1;
 		} else {
 			*overflow = 0;
@@ -750,9 +703,9 @@ int	Cpu::_sub_overflow( IOperand *v1, IOperand *v2, eOperandType type, int *over
 		long double	_v2 = std::stold( v2->toString() );
 		long double result = _v2 - _v1;
 
-		if ( result > DBL_MAX ) {
+		if ( result > std::numeric_limits<double>::max() ) {
 			*overflow = 1;
-		} else if ( result < DBL_MIN ) {
+		} else if ( result < -std::numeric_limits<double>::max() ) {
 			*overflow = -1;
 		} else {
 			*overflow = 0;
