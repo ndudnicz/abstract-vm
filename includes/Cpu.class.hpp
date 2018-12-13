@@ -9,10 +9,10 @@
 
 # define END_OF_INPUT	";;"
 
-# define EXCEP_CANT_OPEN_FILE					"Exception : Can't open file : "
-# define EXCEP_UNKNOWN_INSTRUCTION		"Exception : Unknown instruction line : "
-# define EXCEP_UNKNOWN_TYPE						"Exception : Unknown type line : "
-# define EXCEP_INVALID_VALUE					"Exception : Invalid value line : "
+# define EXCEP_CANT_OPEN_FILE					"Error : Can't open file : "
+# define EXCEP_UNKNOWN_INSTRUCTION		"Error : Unknown instruction line : "
+# define EXCEP_UNKNOWN_TYPE						"Error : Unknown type line : "
+# define EXCEP_INVALID_VALUE					"Error : Invalid value line : "
 
 # define _CONCAT(A, B) A # B
 # define EVALUATOR(A, B) _CONCAT(A, B)
